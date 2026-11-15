@@ -6,12 +6,11 @@
 
 <p align="center">
   <strong>Explore the suburbs. Understand the numbers.</strong><br>
-  An independent, bilingual view of recorded crime across Greater Sydney and the Central Coast.<br>
-  用数据探索悉尼与中央海岸的社区。
+  An independent, bilingual view of recorded crime across Greater Sydney and the Central Coast.
 </p>
 
 <p align="center">
-  <a href="https://sydcrime.xdxo.top/"><strong>打开地图 · Open the map &rarr;</strong></a>
+  <a href="https://sydcrime.xdxo.top/"><strong>Open the map &rarr;</strong></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="#automatic-data-updates">Automatic updates</a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
