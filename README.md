@@ -47,7 +47,7 @@ Sydney Crime Map is an independent, bilingual tool for exploring police-recorded
 
 | | |
 | --- | --- |
-| **Crime data period** | July 2025 to June 2026 |
+| **Crime data period** | Latest processed 12 months; see `work/crime_period.json` |
 | **Population and boundaries** | Australian Bureau of Statistics (ABS), 2021 Census and geography |
 | **Geographic coverage** | Greater Sydney and the Central Coast; 926 suburbs |
 | **Offence categories** | 62 recorded offence categories |
@@ -62,7 +62,7 @@ Crime figures are derived from data published by the NSW Bureau of Crime Statist
 - Incidents may involve visitors, workers and other non-residents who are not counted in the resident population.
 - Rankings describe recorded incident rates across the covered suburbs. They are not a complete measure of safety or an assessment of individual risk.
 
-The data in this repository are processed snapshots. They do **not** update automatically when the source agencies publish new figures.
+The repository contains processed snapshots. Once enabled on GitHub, the update workflow can refresh them from BOCSAR; publishing the updated site also requires Cloudflare setup described in [the automation guide](docs/automation.md).
 
 ### Official sources
 
@@ -85,6 +85,18 @@ node work/build_suburb_view.mjs
 node work/build-seo.mjs
 ```
 
+To run the complete validation and build:
+
+```bash
+python work/check_site.py
+```
+
+To check the official data without changing the snapshot:
+
+```bash
+python work/update_crime_data.py --dry-run
+```
+
 To preview the generated site locally:
 
 ```bash
@@ -105,7 +117,9 @@ work/
   suburb_view.html          Interactive page template
   suburb_*.js, *.css        Interface, map and language modules
   crime_data.json           Processed crime and population snapshot
+  crime_period.json         Reporting period of the current snapshot
   suburb_shapes.json        Processed suburb boundaries
+  update_crime_data.py      Download and process BOCSAR suburb data
   build_suburb_view.mjs     Interactive page builder
   build-seo.mjs             Bilingual pages and sitemap builder
 outputs/sydney-crime-seo/   Ready-to-publish static site
@@ -113,4 +127,4 @@ outputs/sydney-crime-seo/   Ready-to-publish static site
 
 ## Deployment
 
-Publish the contents of `outputs/sydney-crime-seo/` as a static site, keeping its directory structure intact. It can be uploaded to Cloudflare Workers as static assets. This repository does not currently include an automatic deployment pipeline.
+Publish the contents of `outputs/sydney-crime-seo/` as static assets. The [automation guide](docs/automation.md) describes the GitHub workflow, the Cloudflare scheduler, deployment prerequisites, and verification.

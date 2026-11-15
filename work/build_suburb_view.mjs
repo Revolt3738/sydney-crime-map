@@ -2,22 +2,25 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import vm from "node:vm";
 import {selectPlaces} from "./seo-places.mjs";
+import {applyPeriod, periodCopy, translatePeriod} from "./period-copy.mjs";
 
 const directory = new URL("./", import.meta.url);
-const [template, script, raw, rawShapes, mapScript, mapCss, englishCopy, languageScript, gesturesScript, compareScript, detailsScript, chineseCopy, descriptionCopy] = await Promise.all(
+const [templateCopy, script, raw, rawShapes, mapScript, mapCss, englishCopy, languageScript, gesturesScript, compareScript, detailsScript, chineseCopy, descriptionCopy, rawPeriod] = await Promise.all(
   ["suburb_view.html", "suburb_view.js", "crime_data.json", "suburb_shapes.json",
     "suburb_map.js", "suburb_map.css", "suburb_english.json", "suburb_language.js",
-    "suburb_gestures.js", "suburb_compare.js", "suburb_details.js", "suburb_chinese_labels.json", "seo-descriptions.json"].map(
+    "suburb_gestures.js", "suburb_compare.js", "suburb_details.js", "suburb_chinese_labels.json", "seo-descriptions.json", "crime_period.json"].map(
     name => fs.readFile(new URL(name, directory), "utf8"),
   ),
 );
 const data = JSON.parse(raw);
+const period = periodCopy(JSON.parse(rawPeriod));
+const template = applyPeriod(templateCopy, period);
 const faviconPng = await fs.readFile(new URL("suburb_favicon_user.png", directory));
 assert.equal(faviconPng.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
 const shapes = JSON.parse(rawShapes);
-const english = JSON.parse(englishCopy);
+const english = translatePeriod(JSON.parse(englishCopy), period);
 const chineseDataLabels = JSON.parse(chineseCopy);
-const pageDescriptions = JSON.parse(descriptionCopy);
+const pageDescriptions = translatePeriod(JSON.parse(descriptionCopy), period);
 assert.deepEqual(Object.keys(pageDescriptions).sort(), ["en", "zh"]);
 for (const description of Object.values(pageDescriptions)) assert.doesNotMatch(description, /["<>]/);
 const resolvedLanguageScript = languageScript.replace("__SUBURB_DESCRIPTIONS__", JSON.stringify(pageDescriptions));
@@ -59,14 +62,15 @@ const embedded = html.match(/<script type="application\/json" id="dataset">([^]*
 assert.deepEqual(JSON.parse(embedded), data);
 assert.equal(data.rows.length, 926);
 assert.equal(new Set(data.rows.map(row => row.code)).size, 926);
-assert.equal(data.rows.filter(row => row.violent[2] !== null).length, 910);
+assert.equal(data.rows.filter(row => row.violent[2] !== null).length,
+  data.rows.filter(row => row.source && row.pop > 0).length);
 assert.equal(Object.keys(data.labels).length, 62);
 assert.deepEqual(Object.keys(shapes).sort(), data.rows.map(row => row.code).sort());
 for (const [path, box] of Object.values(shapes)) {
   assert.match(path, /^M[\d., MZ-]+Z$/);
   assert.ok(box.every(Number.isFinite) && box[0] < box[2] && box[1] < box[3]);
 }
-assert.doesNotMatch(html, /__SUBURB_[A-Z_]+__/);
+assert.doesNotMatch(html, /__(?:SUBURB|CRIME)_[A-Z_]+__/);
 
 const start = 'start(JSON.parse(document.getElementById("dataset").textContent));';
 assert.ok(script.trimEnd().endsWith(start));
@@ -158,20 +162,20 @@ vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + compare
   assert.equal(restore.search.value, "Gosford");
   assert.equal(restore.population.value, "500");
   assert.equal(filterRows(data.rows, "Kingsford", "Central Coast").length, 0);
-  assert.equal(sortedRows(compare, "burglary", "rateHigh")[0].name, "Kingsford (NSW)");
-  assert.equal(sortedRows(compare, "burglary", "countHigh")[0].name, "Blacktown");
-  assert.equal(sortedRows(compare, "burglary", "rateLow")[0].name, "Blacktown");
+  const sortingFixture = [
+    {name: "Alpha", burglary: [30, 10, 2]},
+    {name: "Beta", burglary: [10, 20, 1]},
+    {name: "Missing", burglary: [null, null, null]},
+  ];
+  assert.equal(sortedRows(sortingFixture, "burglary", "rateHigh").map(row => row.name).join(","), "Beta,Alpha,Missing");
+  assert.equal(sortedRows(sortingFixture, "burglary", "countHigh").map(row => row.name).join(","), "Alpha,Beta,Missing");
+  assert.equal(sortedRows(sortingFixture, "burglary", "rateLow").map(row => row.name).join(","), "Alpha,Beta,Missing");
   assert.equal(sortedRows(compare, "violent", "name")[0].name, "Blacktown");
-  assert.equal(sortedRows(data.rows, "non_dv", "rateHigh")[0].name, "Moore Park");
-  assert.equal(sortedRows(data.rows, "burglary", "rateHigh")[0].name, "Crangan Bay");
-  assert.equal(sortedRows(data.rows, "violent", "rateLow").slice(-16).every(r => r.violent[1] === null), true);
-  assert.equal(compare.find(r => r.name === "Blacktown").counts["Break and enter dwelling"], 99);
-  assert.equal(compare.find(r => r.name.startsWith("Kingsford")).counts["Break and enter dwelling"], 37);
   const populationFiltered = filterRows(data.rows, "", "", 2000);
   assert.ok(populationFiltered.length < data.rows.length && populationFiltered.length > 500);
   assert.ok(populationFiltered.every(row => row.pop >= 2000));
   assert.equal(filterRows([{pop: 1999}, {pop: 2000}], "", "", 2000).length, 1);
-  assert.equal(populationFiltered.find(row => row.name === "Blacktown").violent[2], 100);
+  assert.ok(populationFiltered.find(row => row.name === "Blacktown").violent[2] > 0);
   for (const key of Object.keys(metrics)) {
     const limits = crimeBreaks(data.rows, key);
     assert.equal(limits.length, 5);
@@ -239,9 +243,10 @@ vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + compare
   assert.equal(selected.join(","), "10396");
   assert.equal(captures.join(","), "1,2,3,4");
   const blacktown = data.rows.find(row => row.name === "Blacktown");
-  assert.match(describeArea(blacktown, "burglary", 2000), /99 件.*194\.3.*250/);
+  const descriptionFixture = {...blacktown, burglary: [99, 194.3, 250]};
+  assert.match(describeArea(descriptionFixture, "burglary", 2000), /99 件.*194\.3.*250/);
   pageLanguage = "en";
-  assert.match(describeArea(blacktown, "burglary", 2000),
+  assert.match(describeArea(descriptionFixture, "burglary", 2000),
     /Residential break-ins 99 incidents.*194[.]3 incidents per 100,000 residents.*Rate rank 250 in Greater Sydney and Central Coast/);
   assert.match(detailSummary(blacktown), /2021 Census population 50,961/);
   assert.equal(offenceLabel("Murder *"), "Murder *");

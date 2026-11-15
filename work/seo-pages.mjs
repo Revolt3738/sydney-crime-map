@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {ORIGIN} from "./seo-home.mjs";
+import {periodCopy} from "./period-copy.mjs";
 
 const KEYS = ["non_dv", "burglary", "assault", "violent"];
 const LABELS = {
@@ -9,7 +10,7 @@ const LABELS = {
 const TEXT = {
   zh: {
     title: "犯罪率与案件统计", home: "返回互动地图与完整排名", population: "2021 年普查人口",
-    period: "警方记录案件：2025 年 7 月至 2026 年 6 月", category: "类别", incidents: "案件数",
+    period: "警方记录案件", category: "类别", incidents: "案件数",
     rate: "每 10 万居民记录案件数", baseline: "大悉尼及中央海岸加权记录率", rank: "全区记录率排名",
     overview: "案件与记录率", detail: "62 类警方记录案件", sources: "口径与来源",
     note: "记录率使用 2021 年普查人口计算，并非个人遭遇犯罪的概率。人口变化、游客和商业活动可能影响比较；小人口地区的比率尤其容易波动。排名覆盖大悉尼及中央海岸全部可计算的 suburb，不随首页人口筛选改变。",
@@ -18,7 +19,7 @@ const TEXT = {
   },
   en: {
     title: "Crime Rates and Statistics", home: "Interactive map and full rankings", population: "2021 Census population",
-    period: "Police-recorded incidents: July 2025 to June 2026", category: "Offence", incidents: "Incidents",
+    period: "Police-recorded incidents", category: "Offence", incidents: "Incidents",
     rate: "Recorded incidents per 100,000 residents", baseline: "Greater Sydney and Central Coast weighted rate", rank: "Overall rate rank",
     overview: "Incidents and recorded rates", detail: "62 police-recorded offence categories", sources: "Methods and sources",
     note: "Rates use 2021 Census populations and are not an individual’s probability of experiencing crime. Population change, visitors and commercial activity can affect comparisons; rates for small populations are particularly volatile. Ranks include all suburbs with calculable rates across Greater Sydney and the Central Coast and do not change with the home page population filter.",
@@ -38,12 +39,12 @@ function baseline(rows, key) {
     available.reduce((sum, row) => sum + row.pop, 0) * 100_000;
 }
 
-function meta(row, place, lang) {
+function meta(row, place, {lang, dates}) {
   const en = lang === "en";
   const title = en ? `${row.source} Crime Rate and Statistics | Sydney Crime Map` : `${row.source} 犯罪率与统计｜悉尼犯罪地图`;
   const description = en
-    ? `${row.source} crime rates: ${integer(row.non_dv[0])} non-domestic assaults and ${integer(row.burglary[0])} residential break-ins recorded July 2025 to June 2026. Compare incident rates and population.`
-    : `${row.source} 犯罪率与案件统计：2025 年 7 月至 2026 年 6 月记录非家暴袭击 ${integer(row.non_dv[0])} 件、住宅入室盗窃 ${integer(row.burglary[0])} 件。查看人口及统计口径。`;
+    ? `${row.source} crime rates: ${integer(row.non_dv[0])} non-domestic assaults and ${integer(row.burglary[0])} residential break-ins recorded ${dates.en}. Compare incident rates and population.`
+    : `${row.source} 犯罪率与案件统计：${dates.zh}记录非家暴袭击 ${integer(row.non_dv[0])} 件、住宅入室盗窃 ${integer(row.burglary[0])} 件。查看人口及统计口径。`;
   const zhUrl = ORIGIN + pathFor(place.slug, "zh");
   const enUrl = ORIGIN + pathFor(place.slug, "en");
   const url = lang === "en" ? enUrl : zhUrl;
@@ -80,13 +81,15 @@ function navigation(place, lang) {
   return `<nav><a href="${home}">${text.home}</a><span class="languages"><a href="${pathFor(place.slug, "zh")}" lang="zh-Hans">中文</a> <a href="${pathFor(place.slug, "en")}" lang="en-AU">English</a></span></nav>`;
 }
 
-export function suburbPage({data, labels, place, lang, css, favicon}) {
+export function suburbPage({data, labels, place, lang, css, favicon, period}) {
   const row = data.rows.find(candidate => candidate.source === place.source);
   assert.ok(row && KEYS.every(key => row[key][1] !== null));
   const text = TEXT[lang];
+  const dates = periodCopy(period);
+  const periodLabel = `${text.period}${lang === "en" ? ": " : "："}${dates[lang]}`;
   const region = lang === "en" ? row.region : labels.regions[row.region];
   const home = lang === "en" ? "/en/" : "/";
   const homeSearch = `${home}?q=${encodeURIComponent(place.source)}`;
-  const body = `${navigation(place, lang)}<header><p class="kicker">${escapeHtml(region)}</p><h1>${escapeHtml(row.source)} · ${text.title}</h1><p>${text.period}</p><p>${text.population}：<strong>${integer(row.pop)}</strong></p><p><a class="action" href="${homeSearch}">${text.compare} →</a></p></header>${overview(data, row, lang)}${offenceDetails(data, row, lang, labels)}<footer><h2>${text.sources}</h2><p>${text.methods}</p><p><a href="https://bocsar.nsw.gov.au/statistics-dashboards/open-datasets/criminal-offences-data.html">${text.bocsar}</a> · <a href="https://www.abs.gov.au/census/find-census-data/datapacks">${text.abs}</a></p></footer>`;
-  return `<!doctype html><html lang="${lang === "en" ? "en-AU" : "zh-Hans"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${meta(row, place, lang)}<link rel="icon" type="image/png" href="data:image/png;base64,${favicon}"><style>${css}</style></head><body><main>${body}</main></body></html>`;
+  const body = `${navigation(place, lang)}<header><p class="kicker">${escapeHtml(region)}</p><h1>${escapeHtml(row.source)} · ${text.title}</h1><p>${escapeHtml(periodLabel)}</p><p>${text.population}：<strong>${integer(row.pop)}</strong></p><p><a class="action" href="${homeSearch}">${text.compare} →</a></p></header>${overview(data, row, lang)}${offenceDetails(data, row, lang, labels)}<footer><h2>${text.sources}</h2><p>${text.methods}</p><p><a href="https://bocsar.nsw.gov.au/statistics-dashboards/open-datasets/criminal-offences-data.html">${text.bocsar}</a> · <a href="https://www.abs.gov.au/census/find-census-data/datapacks">${text.abs}</a></p></footer>`;
+  return `<!doctype html><html lang="${lang === "en" ? "en-AU" : "zh-Hans"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${meta(row, place, {lang, dates})}<link rel="icon" type="image/png" href="data:image/png;base64,${favicon}"><style>${css}</style></head><body><main>${body}</main></body></html>`;
 }

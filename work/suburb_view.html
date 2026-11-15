@@ -149,7 +149,7 @@ __SUBURB_MAP_CSS__
       </div>
     </div>
     <h1>悉尼犯罪率与中央海岸统计</h1>
-    <div class="meta"><span>2025 年 7 月至 2026 年 6 月</span><span id="coverage"></span><span>比率以 2021 年普查人口计算</span></div>
+    <div class="meta"><span>__CRIME_PERIOD_ZH__</span><span id="coverage"></span><span>比率以 2021 年普查人口计算</span></div>
   </header>
 
   <section class="explorer" id="explorer" aria-labelledby="explorer-title">
@@ -181,7 +181,7 @@ __SUBURB_MAP_CSS__
     </details>
     <div class="lookup-detail" id="lookup-detail" hidden></div>
     <div class="status"><span id="result" aria-live="polite"></span><span class="muted">名次为全区记录率由高到低的排名</span></div>
-    <p class="result-note">案件统计截至 2026 年 6 月，按 2021 年普查人口折算为每十万人记录率。记录率不等于个人遭遇犯罪的概率。</p>
+    <p class="result-note">案件统计截至 __CRIME_END_ZH__，按 2021 年普查人口折算为每十万人记录率。记录率不等于个人遭遇犯罪的概率。</p>
     <div id="list-view">
     <table class="rank-table" role="table" aria-label="Suburb 排名">
       <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Suburb / SA4</th><th scope="col" role="columnheader">普查人口</th><th scope="col" role="columnheader" data-column="non_dv">非家暴袭击<small class="cell-note">件 / 10 万居民</small></th><th scope="col" role="columnheader" data-column="burglary">住宅入室盗窃<small class="cell-note">件 / 10 万居民</small></th><th scope="col" role="columnheader" data-column="assault">袭击合计<small class="cell-note">件 / 10 万居民</small></th><th scope="col" role="columnheader" data-column="violent">暴力犯罪<small class="cell-note">件 / 10 万居民</small></th></tr></thead>
@@ -243,7 +243,7 @@ __SUBURB_MAP_CSS__
   <footer id="methods">
     <details open>
       <summary>统计口径与来源</summary>
-      <p>案件由新州犯罪统计与研究局（BOCSAR）发布，统计期为 2025 年 7 月至 2026 年 6 月。人口和边界来自澳大利亚统计局（ABS）2021 年普查。跨界 suburb 按完整地区统计。页面版本：2026 年 11 月 11 日。</p>
+      <p>案件由新州犯罪统计与研究局（BOCSAR）发布，统计期为 __CRIME_PERIOD_ZH__。人口和边界来自澳大利亚统计局（ABS）2021 年普查。跨界 suburb 按完整地区统计。</p>
       <p>暴力犯罪按 BOCSAR 季报口径汇总。袭击合计包含家暴及非家暴袭击，袭警另计入暴力犯罪。袭击数据合并了普通袭击和实际造成人身伤害的袭击，无法从表中拆出受伤人数或伤势。住宅入室盗窃仅指 Break and enter dwelling。</p>
       <p>人口为零或未匹配警方数据时，相关字段显示「—」。有正人口的 suburb 均参与排名。小人口地区的案件率更易波动，商业和旅游区的访客也不计入分母。名次按未四舍五入的比率计算，相同率并列。</p>
       <p><a href="https://bocsar.nsw.gov.au/statistics-dashboards/open-datasets/criminal-offences-data.html">BOCSAR 原始数据</a> · <a href="https://bocsar.nsw.gov.au/statistics-dashboards/crime-and-policing/guide-for-the-crime-mapping-tool.html">官方热点地图说明</a> · <a href="https://bocsar.nsw.gov.au/statistics-dashboards/crime-and-policing/rcs-definitions-and-explanations.html">犯罪统计定义</a> · <a href="https://www.abs.gov.au/census/find-census-data/datapacks">ABS 人口数据</a> · <a href="https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs/edition-3-july-2021-june-2026/access-and-downloads/digital-boundary-files">ABS 2021 SAL 地图边界</a></p>

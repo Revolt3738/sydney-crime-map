@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import vm from "node:vm";
+import {periodCopy, translatePeriod} from "./period-copy.mjs";
 
 const rawScript = await fs.readFile(new URL("./suburb_language.js", import.meta.url), "utf8");
-const descriptions = JSON.parse(await fs.readFile(new URL("./seo-descriptions.json", import.meta.url), "utf8"));
+const period = periodCopy(JSON.parse(await fs.readFile(new URL("./crime_period.json", import.meta.url), "utf8")));
+const descriptions = translatePeriod(JSON.parse(await fs.readFile(new URL("./seo-descriptions.json", import.meta.url), "utf8")), period);
 const script = rawScript.replace("__SUBURB_DESCRIPTIONS__", JSON.stringify(descriptions));
-const translations = JSON.parse(await fs.readFile(new URL("./suburb_english.json", import.meta.url), "utf8"));
+const translations = translatePeriod(JSON.parse(await fs.readFile(new URL("./suburb_english.json", import.meta.url), "utf8")), period);
 
 function mockElement(dataset = {}, attributes = {}) {
   const values = new Map(Object.entries(attributes));
@@ -23,6 +25,7 @@ function runScenario(initial) {
     {data: english ? "Sydney and Central Coast Crime Rates" : "悉尼犯罪率与中央海岸统计"},
     {data: english ? "  10 suburbs with the largest populations\n" : "  人口最多的 10 个 suburb\n"},
     {data: english ? "Sydney Crime Rates by Suburb | Crime Map and Statistics" : "悉尼犯罪率及中央海岸｜各区犯罪地图与统计"},
+    {data: english ? period.en : period.zh},
   ];
   const aria = mockElement({}, {"aria-label": english ? "Page language" : "页面语言"});
   const zh = mockElement({language: "zh"});
@@ -55,6 +58,7 @@ function runScenario(initial) {
   assert.equal(nodes[0].data, english ? "悉尼犯罪率与中央海岸统计" : "Sydney and Central Coast Crime Rates");
   assert.equal(nodes[1].data, english ? "  人口最多的 10 个 suburb\n" : "  10 suburbs with the largest populations\n");
   assert.equal(nodes[2].data, english ? "悉尼犯罪率及中央海岸｜各区犯罪地图与统计" : "Sydney Crime Rates by Suburb | Crime Map and Statistics");
+  assert.equal(nodes[3].data, english ? period.zh : period.en);
   assert.equal(aria.getAttribute("aria-label"), english ? "页面语言" : "Page language");
   assert.equal(first.getAttribute("aria-current"), "page");
   assert.equal(new URL(location.href).searchParams.get("q"), "Chatswood");

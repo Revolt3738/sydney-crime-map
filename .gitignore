@@ -1,3 +1,11 @@
 /outputs/index.html
 /outputs/大悉尼及中央海岸_Suburb犯罪查询.html
 /work/__pycache__/
+/work/automation/__pycache__/
+/work/.crime-download-*/
+/tests/__pycache__/
+/.codex-tasks/
+/node_modules/
+/.cloudflare/
+/scheduler/node_modules/
+/scheduler/.cloudflare/

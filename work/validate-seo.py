@@ -2,6 +2,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
 from xml.etree import ElementTree
+from calendar import month_name
 import json
 import re
 
@@ -10,6 +11,7 @@ SITE = ROOT / "outputs" / "sydney-crime-seo"
 ORIGIN = "https://sydcrime.xdxo.top"
 DATA = json.loads((ROOT / "work" / "crime_data.json").read_text(encoding="utf-8"))
 LABELS = json.loads((ROOT / "work" / "suburb_chinese_labels.json").read_text(encoding="utf-8"))
+PERIOD = json.loads((ROOT / "work" / "crime_period.json").read_text(encoding="utf-8"))
 LEADERS = (
     ("blacktown", "Blacktown", 50961), ("castle-hill", "Castle Hill", 40874),
     ("auburn", "Auburn", 39333), ("baulkham-hills", "Baulkham Hills", 37415),
@@ -148,6 +150,14 @@ def weighted_rate(key):
     return sum(row[key][0] for row in rows) / sum(row["pop"] for row in rows) * 100_000
 
 
+def expected_period(language):
+    start_year, start_month = map(int, PERIOD["start"].split("-"))
+    end_year, end_month = map(int, PERIOD["end"].split("-"))
+    if language == "en":
+        return f"{month_name[start_month]} {start_year} to {month_name[end_month]} {end_year}"
+    return f"{start_year} 年 {start_month} 月至 {end_year} 年 {end_month} 月"
+
+
 def verify_suburb(slug, name, language):
     prefix = "en/" if language == "en" else ""
     relative = f"{prefix}suburbs/{slug}/index.html"
@@ -157,6 +167,8 @@ def verify_suburb(slug, name, language):
     assert name in doc.headings[0]
     assert (f"{name} Crime Rate" if language == "en" else f"{name} 犯罪率") in doc.title
     assert (f"{name} crime rates" if language == "en" else f"{name} 犯罪率") in doc.description
+    assert expected_period(language) in " ".join(doc.visible)
+    assert expected_period(language) in doc.description
     assert len(doc.rows) == 4 and len(doc.offences) == 124
     for index, key in enumerate(KEYS):
         cells = doc.rows[index]
@@ -190,6 +202,7 @@ def main():
         keyword = "Sydney Crime Rates by Suburb" if expected == "en-AU" else "悉尼犯罪率"
         assert keyword in doc.title
         assert ("Sydney crime rates by suburb" if expected == "en-AU" else "悉尼犯罪率") in doc.description
+        assert expected_period("en" if expected == "en-AU" else "zh") in " ".join(doc.visible)
         verify_internal_links(doc)
         verify_metadata(doc, relative)
         if expected == "en-AU":

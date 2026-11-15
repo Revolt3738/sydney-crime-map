@@ -5,19 +5,22 @@ import {fileURLToPath} from "node:url";
 import {makeEnglishHome, ORIGIN} from "./seo-home.mjs";
 import {suburbPage} from "./seo-pages.mjs";
 import {selectPlaces} from "./seo-places.mjs";
+import {periodCopy, translatePeriod} from "./period-copy.mjs";
 
 const work = path.dirname(fileURLToPath(import.meta.url));
 const target = path.resolve(work, "../outputs/sydney-crime-seo");
 const read = name => fs.readFile(path.join(work, name), "utf8");
-const [raw, rawLabels, rawEnglish, rawDescriptions, css, faviconBytes, home] = await Promise.all([
+const [raw, rawLabels, rawEnglish, rawDescriptions, rawPeriod, css, faviconBytes, home] = await Promise.all([
   read("crime_data.json"), read("suburb_chinese_labels.json"), read("suburb_english.json"),
-  read("seo-descriptions.json"), read("seo-pages.css"), fs.readFile(path.join(work, "suburb_favicon_user.png")),
+  read("seo-descriptions.json"), read("crime_period.json"), read("seo-pages.css"), fs.readFile(path.join(work, "suburb_favicon_user.png")),
   fs.readFile(path.resolve(work, "../outputs/大悉尼及中央海岸_Suburb犯罪查询.html"), "utf8"),
 ]);
 const data = JSON.parse(raw);
 const labels = JSON.parse(rawLabels);
-const translations = JSON.parse(rawEnglish);
-const descriptions = JSON.parse(rawDescriptions);
+const period = JSON.parse(rawPeriod);
+const dates = periodCopy(period);
+const translations = translatePeriod(JSON.parse(rawEnglish), dates);
+const descriptions = translatePeriod(JSON.parse(rawDescriptions), dates);
 const places = selectPlaces(data.rows).all;
 const favicon = faviconBytes.toString("base64");
 const schema = JSON.parse(home.match(/<script type="application\/ld\+json">([^]*?)<\/script>/)[1]);
@@ -28,7 +31,7 @@ const assets = new Map([["index.html", home], ["en/index.html", makeEnglishHome(
 for (const place of places) {
   for (const lang of ["zh", "en"]) {
     const prefix = lang === "en" ? "en/" : "";
-    assets.set(`${prefix}suburbs/${place.slug}/index.html`, suburbPage({data, labels, place, lang, css, favicon}));
+    assets.set(`${prefix}suburbs/${place.slug}/index.html`, suburbPage({data, labels, place, lang, css, favicon, period}));
   }
 }
 
@@ -43,15 +46,12 @@ for (const [name, html] of assets) {
   assert.match(html, /<meta name="description" content="[^"]+">/);
   assert.match(html, /hreflang="zh-Hans"/);
   assert.match(html, /hreflang="en"/);
-  assert.doesNotMatch(html, /__SUBURB_[A-Z_]+__/);
+  assert.doesNotMatch(html, /__(?:SUBURB|CRIME)_[A-Z_]+__/);
 }
 assert.equal(urls.length, 2 + places.length * 2);
 assert.equal(new Set(urls).size, urls.length);
 assert.equal(data.rows.length, 926);
 assert.equal(Object.keys(data.labels).length, 62);
-assert.match(assets.get("suburbs/blacktown/index.html"), /50,961/);
-assert.match(assets.get("suburbs/blacktown/index.html"), /99/);
-assert.match(assets.get("en/suburbs/chatswood/index.html"), /143/);
 assert.doesNotMatch([...assets.values()].join("\n"), /(?:href|src)="[^"]+\.(?:csv|xlsx|zip)(?:[?#"][^\s]*)/i);
 
 await fs.mkdir(target, {recursive: true});
