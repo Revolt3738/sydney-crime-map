@@ -1,0 +1,29 @@
+:root{font:16px/1.65 "Segoe UI","Microsoft YaHei",sans-serif;color:#142e3c;background:#edf3f4}
+*{box-sizing:border-box}
+body{margin:0}
+main{max-width:1080px;margin:auto;padding:clamp(16px,4vw,50px)}
+a{color:#006459;text-underline-offset:.2em}
+nav{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.languages{display:flex;gap:12px;white-space:nowrap}
+header{border-top:5px solid #142e3c;margin-top:20px;padding:20px 0}
+.kicker{font-weight:700;color:#006459}
+h1{font:700 clamp(1.8rem,5vw,3.6rem)/1.15 Georgia,"Songti SC","Microsoft YaHei",serif;margin:10px 0}
+h2{font-size:1.25rem;margin:0 0 12px}
+p{margin:8px 0}
+section{background:#fff;border:1px solid #cbdadd;border-radius:14px;padding:clamp(14px,3vw,24px);margin:18px 0}
+footer{color:#48616c;font-size:.9rem;margin:24px 0}
+.action{display:inline-block;margin-top:8px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.9rem}
+th,td{text-align:left;padding:9px;border-bottom:1px solid #cbdadd;vertical-align:top}
+thead th{background:#e7eff0}
+dl{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;margin:0}
+dl div{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px solid #cbdadd}
+dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:650px){
+  dl{grid-template-columns:1fr}
+  table,tbody,tr{display:block}
+  thead{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
+  tr{border:1px solid #cbdadd;border-radius:8px;margin:10px 0;padding:8px}
+  th,td{display:flex;justify-content:space-between;gap:15px;border:0;padding:4px}
+  td::before{content:attr(data-label);color:#48616c}
+}

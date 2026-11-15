@@ -1,0 +1,65 @@
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+import {makeEnglishHome, ORIGIN} from "./seo-home.mjs";
+import {suburbPage} from "./seo-pages.mjs";
+import {selectPlaces} from "./seo-places.mjs";
+
+const work = path.dirname(fileURLToPath(import.meta.url));
+const target = path.resolve(work, "../outputs/sydney-crime-seo");
+const read = name => fs.readFile(path.join(work, name), "utf8");
+const [raw, rawLabels, rawEnglish, rawDescriptions, css, faviconBytes, home] = await Promise.all([
+  read("crime_data.json"), read("suburb_chinese_labels.json"), read("suburb_english.json"),
+  read("seo-descriptions.json"), read("seo-pages.css"), fs.readFile(path.join(work, "suburb_favicon_user.png")),
+  fs.readFile(path.resolve(work, "../outputs/大悉尼及中央海岸_Suburb犯罪查询.html"), "utf8"),
+]);
+const data = JSON.parse(raw);
+const labels = JSON.parse(rawLabels);
+const translations = JSON.parse(rawEnglish);
+const descriptions = JSON.parse(rawDescriptions);
+const places = selectPlaces(data.rows).all;
+const favicon = faviconBytes.toString("base64");
+const schema = JSON.parse(home.match(/<script type="application\/ld\+json">([^]*?)<\/script>/)[1]);
+assert.equal(schema["@type"], "WebSite");
+assert.equal(schema.url, `${ORIGIN}/`);
+const assets = new Map([["index.html", home], ["en/index.html", makeEnglishHome(home, translations, descriptions)]]);
+
+for (const place of places) {
+  for (const lang of ["zh", "en"]) {
+    const prefix = lang === "en" ? "en/" : "";
+    assets.set(`${prefix}suburbs/${place.slug}/index.html`, suburbPage({data, labels, place, lang, css, favicon}));
+  }
+}
+
+const urls = [...assets.keys()].map(name => ORIGIN + (name === "index.html" ? "/" : `/${name.replace(/index\.html$/, "")}`));
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <url><loc>${url}</loc></url>`).join("\n")}\n</urlset>\n`;
+assets.set("sitemap.xml", sitemap);
+
+for (const [name, html] of assets) {
+  if (!name.endsWith(".html")) continue;
+  const canonical = urls.find(url => name === "index.html" ? url === ORIGIN + "/" : url === ORIGIN + "/" + name.replace(/index\.html$/, ""));
+  assert.ok(html.includes(`<link rel="canonical" href="${canonical}">`), `Bad canonical: ${name}`);
+  assert.match(html, /<meta name="description" content="[^"]+">/);
+  assert.match(html, /hreflang="zh-Hans"/);
+  assert.match(html, /hreflang="en"/);
+  assert.doesNotMatch(html, /__SUBURB_[A-Z_]+__/);
+}
+assert.equal(urls.length, 2 + places.length * 2);
+assert.equal(new Set(urls).size, urls.length);
+assert.equal(data.rows.length, 926);
+assert.equal(Object.keys(data.labels).length, 62);
+assert.match(assets.get("suburbs/blacktown/index.html"), /50,961/);
+assert.match(assets.get("suburbs/blacktown/index.html"), /99/);
+assert.match(assets.get("en/suburbs/chatswood/index.html"), /143/);
+assert.doesNotMatch([...assets.values()].join("\n"), /(?:href|src)="[^"]+\.(?:csv|xlsx|zip)(?:[?#"][^\s]*)/i);
+
+await fs.mkdir(target, {recursive: true});
+for (const [name, contents] of assets) {
+  const destination = path.join(target, ...name.split("/"));
+  await fs.mkdir(path.dirname(destination), {recursive: true});
+  await fs.writeFile(destination, contents, "utf8");
+}
+await fs.writeFile(path.resolve(work, "../outputs/index.html"), home, "utf8");
+console.log(`Generated ${assets.size} assets, including ${urls.length} indexable bilingual pages.`);
+console.log(`Deployment directory: ${target}`);

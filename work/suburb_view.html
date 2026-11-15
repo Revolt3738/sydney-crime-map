@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>悉尼犯罪率及中央海岸｜各区犯罪地图与统计</title>
+<meta name="description" content="__SUBURB_META_DESCRIPTION__">
+<link rel="canonical" href="https://sydcrime.xdxo.top/">
+<link rel="alternate" hreflang="zh-Hans" href="https://sydcrime.xdxo.top/">
+<link rel="alternate" hreflang="en" href="https://sydcrime.xdxo.top/en/">
+<link rel="alternate" hreflang="x-default" href="https://sydcrime.xdxo.top/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Sydney Crime Map","alternateName":"Sydney and Central Coast Crime Statistics","url":"https://sydcrime.xdxo.top/"}</script>
+<link rel="icon" type="image/png" href="data:image/png;base64,__SUBURB_FAVICON_PNG__">
+<style>
+:root{--paper:#edf3f4;--white:#fff;--ink:#142e3c;--muted:#48616c;--line:#cbdadd;--teal:#006459;--teal-soft:#e1f1ed;--amber:#7b4a17;font:16px/1.6 "Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--paper)}
+*{box-sizing:border-box}
+body{margin:0}
+main{width:min(1440px,100%);margin:auto;padding:clamp(16px,4vw,56px)}
+h1,h2,h3,p{margin:0}
+header{border-block:5px solid var(--ink) 1px;padding:20px 0 25px}
+.kicker{color:var(--teal);font-weight:800;letter-spacing:.08em;font-size:.83rem}
+.header-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.language-switch{display:flex;flex-shrink:0;gap:4px;border:1px solid var(--line);border-radius:8px;padding:3px;background:var(--white)}
+.language-switch [data-language]{display:inline-block;border:0;border-radius:5px;padding:7px 9px;background:transparent;font-size:.84rem;font-weight:700;text-decoration:none}
+.language-switch [aria-current="page"]{background:var(--teal);color:var(--white)}
+.search-label{display:block;margin-top:12px}
+.search-label input{display:block;margin-top:4px}
+.compare-tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.compare-tools:empty{display:none}
+.compare-tools button{padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:#edf4f4;text-align:left}
+.suggestions-list{display:grid;gap:4px;margin:8px 0}
+.suggestions-list:empty{display:none}
+.suggestion-row{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:5px 8px;background:#f1f6f6;border-radius:7px}
+.suggestion-name{min-width:0;overflow-wrap:anywhere}
+.area-actions{display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap;justify-content:flex-end}
+.compare-add{padding:5px 9px;border:1px solid var(--line);border-radius:7px;background:#edf4f4;color:var(--teal);font-size:.82rem;font-weight:700}
+.compare-add[aria-disabled="true"]{color:var(--muted);cursor:default}
+.place .compare-add,.detail-content .compare-add{margin-top:5px}
+.lookup-detail{margin:8px 0;background:#f3f8f8;border:1px solid var(--line);border-radius:8px;padding:10px}
+.compare-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:8px;margin:8px 0 14px}
+.compare-cards article{min-width:0;border:1px solid var(--line);border-radius:8px;padding:10px;overflow-wrap:anywhere}
+.compare-panel{margin:8px 0;padding:6px 10px;background:#f1f6f6;border-radius:8px}
+.result-note{margin:4px 0 12px;font-size:.88rem;color:var(--muted)}
+.family details[open] summary{margin-bottom:12px}
+h1{font:700 clamp(2rem,5vw,4.2rem)/1.14 Georgia,"Songti SC","Microsoft YaHei",serif;margin:10px 0 14px;letter-spacing:-.035em}
+h2{font-size:1.35rem;line-height:1.3}
+h3{font-size:1rem}
+.muted,small{color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:7px 22px;font-size:.92rem}
+section,footer{margin-top:25px}
+.family{background:var(--ink);color:var(--white);padding:clamp(16px,3vw,29px);border-radius:14px}
+.family p{color:#e2edf1;font-size:.91rem}
+.family h2{margin-bottom:15px}
+.route{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.stop{border-top:2px solid #8acabb;padding:10px 0 0}
+.stop h3{margin-bottom:5px}
+.stop button,.stop a{display:inline-block;margin-top:10px;color:#c1f3e5;font-size:.88rem}
+.family .route-note{margin-top:15px;border-top:1px solid #64808e;padding-top:12px}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--teal);text-underline-offset:.2em}
+button.link{background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:.2em;text-align:left;font-weight:700}
+:focus-visible{outline:3px solid #358375;outline-offset:3px}
+.explorer{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:clamp(12px,2vw,23px)}
+.intro{margin-top:6px;font-size:.9rem}
+.suburb-pages{padding:clamp(12px,2vw,23px);border:1px solid var(--line);border-radius:14px;background:var(--white)}
+.suburb-pages ol{display:flex;flex-wrap:wrap;gap:6px 28px;margin:10px 0;padding-left:25px}
+.suburb-pages li{padding-right:6px}
+.core-controls{display:flex;gap:8px 16px;align-items:end;flex-wrap:wrap;margin:9px 0}
+.core-controls label{flex:1 1 180px;max-width:300px;min-width:0}
+.core-controls .view-switch{margin:0}
+.filters{margin:6px 0 10px}
+.filters summary{font-size:.85rem}
+.filter-state{margin-left:6px;font-size:.78rem;font-weight:500;color:var(--muted)}
+.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end;margin:7px 0}
+label{display:flex;flex-direction:column;gap:3px;font-size:.82rem;font-weight:700}
+input,select,.secondary{min-height:43px;border:1px solid #95abb0;border-radius:7px;background:var(--white);padding:6px 10px;width:100%;min-width:0;font-size:.9rem}
+.secondary{font-weight:700;width:auto}
+.status{display:flex;flex-wrap:wrap;gap:4px 15px;justify-content:space-between;margin-bottom:9px;font-size:.86rem}
+table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;font-size:.87rem}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+thead th{background:#e7eff0;line-height:1.3}
+.rank-table{table-layout:fixed}
+.rank-table th:first-child{width:24%}
+.rank-table th:nth-child(2){width:12%}
+.rank-table tbody tr:hover .place{background:#f0f7f6}
+td.active{background:var(--teal-soft)}
+th.active{background:#cde8e1}
+.metric{display:block;font-weight:750}
+.metric-label,.mobile-unit{display:none;color:var(--muted);font-size:.76rem}
+.metric-label{font-weight:700}
+.cell-note{display:block;color:var(--muted);font-size:.75rem}
+.small-pop{color:var(--amber)}
+.suburb{color:var(--teal)}
+.area{display:block;color:var(--muted);font-size:.75rem}
+.empty{text-align:center;padding:24px}
+details summary{cursor:pointer;font-weight:750}
+footer{font-size:.88rem;color:var(--muted);padding-bottom:12px}
+footer p{margin-top:8px}
+.detail-row td{background:#f3f8f8;padding:15px}
+.detail-meta{margin:8px 0 14px}
+.detail-list{display:grid;grid-template-columns:1fr 1fr;gap:0 15px}
+.detail-list div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:.85rem}
+dt,dd{margin:0}
+dd{font-variant-numeric:tabular-nums;font-weight:700}
+@media(max-width:1020px){
+  .rank-table,.rank-table tbody{display:block}
+  .rank-table thead{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
+  .rank-table tbody{display:grid;gap:10px}
+  .rank-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line);border-radius:8px}
+  .rank-table td{min-width:0;border:0}
+  .rank-table .place,.rank-table .population{border-bottom:1px solid var(--line)}
+  .rank-table .detail-row td,.rank-table .empty{grid-column:1/-1}
+  .metric-label,.mobile-unit{display:block}
+  .rank-table td:not(.place,.population){order:2}
+  .rank-table tr:not(.detail-row) .active{grid-column:1/-1;order:1}
+}
+@media(max-width:700px){.controls{grid-template-columns:minmax(0,1fr)}.controls .secondary{justify-self:start}}
+@media(max-width:530px){
+  main{padding:10px 12px}
+  header{padding:9px 0 11px}
+  h1{font-size:clamp(1.24rem,5vw,1.65rem);margin:7px 0 4px}
+  .kicker,.meta{font-size:.74rem}
+  .meta{gap:2px 9px}
+  .meta span:last-child{display:none}
+  section,footer{margin-top:12px}
+  .explorer h2{font-size:1.06rem}
+  .search-label{margin-top:5px}
+  .search-help{font-size:.75rem}
+  .core-controls{gap:5px 9px}
+  .core-controls label{flex-basis:125px}
+  .core-controls .view-switch{gap:4px}
+  .core-controls .view-switch button{padding-inline:7px;font-size:.8rem}
+  .result-note,.status{font-size:.76rem;margin-bottom:5px}
+  .route,.detail-list{grid-template-columns:1fr}
+  th,td{padding:7px}
+}
+__SUBURB_MAP_CSS__
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="header-top">
+      <div class="kicker">新州警方记录 · SUBURB 级别</div>
+      <div class="language-switch" role="group" aria-label="页面语言">
+        <a href="/" data-language="zh" lang="zh-Hans" aria-current="page">中文</a>
+        <a href="/en/" data-language="en" lang="en-AU">English</a>
+      </div>
+    </div>
+    <h1>悉尼犯罪率与中央海岸统计</h1>
+    <div class="meta"><span>2025 年 7 月至 2026 年 6 月</span><span id="coverage"></span><span>比率以 2021 年普查人口计算</span></div>
+  </header>
+
+  <section class="explorer" id="explorer" aria-labelledby="explorer-title">
+    <h2 id="explorer-title">查找和比较 suburb</h2>
+    <label class="search-label">搜索 suburb<input id="search" type="search" placeholder="Blacktown, Kingsford, Gosford" autocomplete="off" aria-controls="suggestions results"></label>
+    <div id="suggestions" class="suggestions-list" aria-label="精确选区候选"></div>
+    <p class="intro muted search-help">输入地名查看或加入对比。可用逗号搜索多个地区。</p>
+    <div class="core-controls">
+      <label>犯罪指标<select id="metric"><option value="non_dv">非家暴袭击</option><option value="burglary">住宅入室盗窃</option><option value="assault">袭击合计</option><option value="violent">暴力犯罪</option></select></label>
+      <div class="view-switch" aria-label="查看方式">
+        <button type="button" class="secondary" data-view="list" aria-controls="list-view" aria-pressed="true">排名列表</button>
+        <button type="button" class="secondary" data-view="map" aria-controls="map-view" aria-pressed="false">Suburb 地图</button>
+      </div>
+    </div>
+    <details class="filters">
+      <summary><span>筛选</span><span class="filter-state" id="filter-state"></span></summary>
+      <div class="controls">
+        <label>统计区域<select id="region"><option value="">全部区域</option></select></label>
+        <label>最低普查人口<select id="population"><option value="0">显示全部</option><option value="500">至少 500 人</option><option value="1000">至少 1,000 人</option><option value="2000" selected>至少 2,000 人</option><option value="5000">至少 5,000 人</option></select></label>
+        <label>排序方式<select id="order"><option value="rateHigh">案件率从高到低</option><option value="rateLow">案件率从低到高</option><option value="countHigh">案件数从高到低</option><option value="name">Suburb 名称 A–Z</option></select></label>
+        <button class="secondary" id="reset" type="button">重置</button>
+      </div>
+    </details>
+    <details class="compare-panel" id="compare-panel" hidden>
+      <summary id="compare-count" aria-live="polite"></summary>
+      <div id="compare-chips" class="compare-tools"></div>
+      <p id="compare-baseline" class="result-note"></p>
+      <div id="compare-cards" class="compare-cards"></div>
+    </details>
+    <div class="lookup-detail" id="lookup-detail" hidden></div>
+    <div class="status"><span id="result" aria-live="polite"></span><span class="muted">名次为全区记录率由高到低的排名</span></div>
+    <p class="result-note">案件统计截至 2026 年 6 月，按 2021 年普查人口折算为每十万人记录率。记录率不等于个人遭遇犯罪的概率。</p>
+    <div id="list-view">
+    <table class="rank-table" role="table" aria-label="Suburb 排名">
+      <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Suburb / SA4</th><th scope="col" role="columnheader">普查人口</th><th scope="col" role="columnheader" data-column="non_dv">非家暴袭击<small class="cell-note">件 / 10 万居民</small></th><th scope="col" role="columnheader" data-column="burglary">住宅入室盗窃<small class="cell-note">件 / 10 万居民</small></th><th scope="col" role="columnheader" data-column="assault">袭击合计<small class="cell-note">件 / 10 万居民</small></th><th scope="col" role="columnheader" data-column="violent">暴力犯罪<small class="cell-note">件 / 10 万居民</small></th></tr></thead>
+      <tbody id="results" role="rowgroup"></tbody>
+    </table>
+    <button type="button" class="secondary" id="load-more" hidden>显示更多地区</button>
+    </div>
+    <div id="map-view" hidden>
+      <div class="map-toolbar">
+        <button type="button" class="secondary" id="map-fit">定位筛选结果</button>
+        <button type="button" class="secondary" id="map-reset">显示全图</button>
+        <button type="button" class="secondary" id="map-in" aria-label="放大">＋</button>
+        <button type="button" class="secondary" id="map-out" aria-label="缩小">−</button>
+      </div>
+      <div class="map-legend" id="map-legend" aria-label="案件率图例"></div>
+      <p class="map-gestures">电脑用滚轮缩放，拖动平移。手机用双指捏合缩放、单指拖动。在地图外滑动可滚动页面。</p>
+      <div class="map-summary"><p id="map-summary" tabindex="-1" aria-live="polite">点击地图或在搜索候选中定位地区。</p><div id="map-summary-actions"></div></div>
+      <svg id="map-svg" role="group" aria-label="大悉尼及中央海岸的 Suburb 犯罪率分布图">
+        <defs><pattern id="small-area" width=".8" height=".8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width=".8" height=".8" fill="#e7eaed"></rect><path d="M0 0V.8" stroke="#9eabb2" stroke-width=".18"></path></pattern></defs>
+        <g id="map-areas"></g>
+        <g id="map-landmarks" aria-hidden="true"></g>
+      </svg>
+      <p class="intro muted">正案件率按第 20、40、60、80、95 百分位分成六档，最深色标出最高约 5%。零案件、无案件率和低人口筛除各有单独标记。同一指标的分界不随筛选改变。边界来自 <a href="https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SAL/MapServer/0">ABS 2021 SAL 官方接口</a>（CC BY 4.0），经显示简化。</p>
+    </div>
+    <noscript><p>请在浏览器中启用 JavaScript 后重新打开这个 HTML，以查看完整名单。</p></noscript>
+  </section>
+
+  <section class="suburb-pages" aria-labelledby="suburb-pages-title">
+    <h2 id="suburb-pages-title">人口最多的 10 个 suburb</h2>
+    <p class="intro muted">按 2021 年普查人口排序，不代表搜索热度。</p>
+    <ol>__SUBURB_POPULATION_LINKS__</ol>
+    <p class="intro"><span>其他地区：</span> __SUBURB_EXTRA_LINKS__</p>
+  </section>
+
+  <section class="family" aria-labelledby="family-title">
+    <details>
+    <summary id="family-title">家庭指南：先看日常出行、住宅入室盗窃和儿童相关数据</summary>
+    <div class="route">
+      <div class="stop">
+        <h3>01 · 上下学和日常出行</h3>
+        <p>先看非家暴袭击，再看抢劫。结合实际经过的车站、商圈、公园和步行路线，留意案件是否集中在与你家无关的夜生活区。</p>
+        <button class="link" data-metric="non_dv">按非家暴袭击率查看 ↑</button>
+      </div>
+      <div class="stop">
+        <h3>02 · 住所周边</h3>
+        <p>把住宅入室盗窃单独比较。并排看案件数和比率，再结合候选住所附近的热点分布。</p>
+        <button class="link" data-metric="burglary">按住宅入室盗窃率查看 ↑</button>
+      </div>
+      <div class="stop">
+        <h3>03 · 儿童相关暴力</h3>
+        <p>性侵等案件数可以在明细里查到，但这里没有受害者年龄、与施害者的关系或事发场所，无法据此给儿童遇害风险排名。</p>
+        <a href="#methods">查看统计口径 ↓</a>
+      </div>
+    </div>
+    <p class="route-note">总暴力排名适合做背景。它包含家暴、性犯罪和袭警等类别。若比较学校附近或放学路线，优先看实际经过地点的热点和时段。本表也没有交通碰撞数据。</p>
+    </details>
+  </section>
+
+  <footer id="methods">
+    <details open>
+      <summary>统计口径与来源</summary>
+      <p>案件由新州犯罪统计与研究局（BOCSAR）发布，统计期为 2025 年 7 月至 2026 年 6 月。人口和边界来自澳大利亚统计局（ABS）2021 年普查。跨界 suburb 按完整地区统计。页面版本：2026 年 11 月 11 日。</p>
+      <p>暴力犯罪按 BOCSAR 季报口径汇总。袭击合计包含家暴及非家暴袭击，袭警另计入暴力犯罪。袭击数据合并了普通袭击和实际造成人身伤害的袭击，无法从表中拆出受伤人数或伤势。住宅入室盗窃仅指 Break and enter dwelling。</p>
+      <p>人口为零或未匹配警方数据时，相关字段显示「—」。有正人口的 suburb 均参与排名。小人口地区的案件率更易波动，商业和旅游区的访客也不计入分母。名次按未四舍五入的比率计算，相同率并列。</p>
+      <p><a href="https://bocsar.nsw.gov.au/statistics-dashboards/open-datasets/criminal-offences-data.html">BOCSAR 原始数据</a> · <a href="https://bocsar.nsw.gov.au/statistics-dashboards/crime-and-policing/guide-for-the-crime-mapping-tool.html">官方热点地图说明</a> · <a href="https://bocsar.nsw.gov.au/statistics-dashboards/crime-and-policing/rcs-definitions-and-explanations.html">犯罪统计定义</a> · <a href="https://www.abs.gov.au/census/find-census-data/datapacks">ABS 人口数据</a> · <a href="https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs/edition-3-july-2021-june-2026/access-and-downloads/digital-boundary-files">ABS 2021 SAL 地图边界</a></p>
+    </details>
+  </footer>
+</main>
+
+<script type="application/json" id="dataset">__SUBURB_DATA__</script>
+<script type="application/json" id="map-shapes">__SUBURB_SHAPES__</script>
+<script type="application/json" id="english-copy">__SUBURB_ENGLISH__</script>
+<script>
+const chineseDataLabels = __SUBURB_ZH_LABELS__;
+__SUBURB_LANGUAGE_SCRIPT__
+__SUBURB_MAP_SCRIPT__
+__SUBURB_GESTURES_SCRIPT__
+__SUBURB_COMPARE_SCRIPT__
+__SUBURB_DETAILS_SCRIPT__
+__SUBURB_SCRIPT__
+</script>
+</body>
+</html>
