@@ -27,13 +27,17 @@ The workflow in .github/workflows/update-crime-data.yml runs at 02:17 UTC on the
 
 Pull requests targeting main run a separate read-only verification job. On its Ubuntu runner this includes the commit-step integration test using a temporary local Git remote; it does not push project data or publish the site.
 
-GitHub can disable scheduled workflows in public repositories with no activity for 60 days. Re-enable the workflow if that happens. The separate scheduler below is an optional alternative that invokes workflow_dispatch; use one scheduler at a time to avoid duplicate runs. A manual run can also be started from the Actions tab.
+GitHub can disable scheduled workflows in public repositories with no activity for 60 days. The optional Cloudflare watchdog below can recover a workflow disabled for inactivity. A manual run can also be started from the Actions tab.
 
 ## Cloudflare scheduler
 
-scheduler/src/index.mjs invokes the GitHub workflow on main; scheduler/cloudflare.config.ts schedules it at 02:17 UTC on the 15th of each month. Set GITHUB_DISPATCH_TOKEN as a Cloudflare secret using a GitHub credential restricted to this repository with Actions: write permission. Do not put the credential in the repository. A fine-grained personal access token expires and must be renewed before expiry.
+scheduler/src/index.mjs checks the GitHub workflow at 03:17 UTC on the 16th of each month, 25 hours after GitHub's normal scheduled run. If the workflow is active, it does not trigger another update. If GitHub reports disabled_inactivity, the watchdog enables the workflow and dispatches one update on main. It reports other workflow states, including disabled_manually, as errors and does not change them.
 
-The scheduler package declares pinned development dependencies with a lockfile. Install them with npm ci --ignore-scripts. A local cf deployment dry run passed on Windows, including the scheduler's Vite build; it does not verify the GitHub credential or a live dispatch. Set CLOUDFLARE_AUTH_USE_KEYRING=true, require an available OS keyring, and do not fall back to plaintext credentials. The scheduler must be deployed and its secret configured before it can trigger runs. GitHub dispatch success means the workflow was started; inspect the workflow and Cloudflare build status to confirm completion.
+Set GITHUB_DISPATCH_TOKEN as a Cloudflare secret using a GitHub credential restricted to this repository with Actions: write permission. This permission is needed both to enable and dispatch the workflow. Do not put the credential in the repository. If the credential has an expiration date, renew it before expiry. This is a separate Worker from the website and must be deployed with its secret configured before it can run.
+
+For initial rollout, deploy the separate Worker without a Cron Trigger, add the GitHub credential as a Cloudflare Secret, and only then apply the configured trigger. Keep GitHub's normal schedule enabled throughout. Verify the deployed trigger and a real authenticated check before relying on the watchdog.
+
+The scheduler package declares pinned development dependencies with a lockfile. Install them with npm ci --ignore-scripts. A local cf deployment dry run checks the build but does not verify a real credential, Cron invocation, or GitHub recovery. Set CLOUDFLARE_AUTH_USE_KEYRING=true, require an available OS keyring, and do not fall back to plaintext credentials. Check Cloudflare logs and GitHub Actions for failures. If enabling succeeds but dispatch fails, the invocation fails visibly; the normal GitHub schedule remains enabled and the failed dispatch requires investigation. The watchdog does not repair failed data validations, a manually disabled workflow, or other missed scheduled runs.
 
 ## Cloudflare site builds
 
