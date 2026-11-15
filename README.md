@@ -21,13 +21,6 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/926-suburbs-006A60?style=for-the-badge" alt="926 suburbs">
-  <img src="https://img.shields.io/badge/62-offence%20categories-145A67?style=for-the-badge" alt="62 offence categories">
-  <img src="https://img.shields.io/badge/checks-monthly-C76E44?style=for-the-badge" alt="Monthly scheduled data checks">
-  <img src="https://img.shields.io/badge/languages-English%20%2B%20Chinese-475D62?style=for-the-badge" alt="English and Chinese">
-</p>
-
-<p align="center">
   <a href="https://sydcrime.xdxo.top/">
     <img src="docs/site-preview.jpg" width="900" alt="Example of the Sydney Crime Map, showing suburb boundaries, recorded crime rates and a colour legend">
   </a><br>
