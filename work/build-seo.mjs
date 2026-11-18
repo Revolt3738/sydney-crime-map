@@ -28,7 +28,7 @@ assert.equal(schema["@type"], "WebSite");
 assert.equal(schema.url, `${ORIGIN}/`);
 const englishHome = makeEnglishHome(home, translations, descriptions);
 const chineseHome = home.replace(`<link rel="canonical" href="${ORIGIN}/">`, `<link rel="canonical" href="${ORIGIN}/zh/">`);
-const assets = new Map([["index.html", englishHome], ["zh/index.html", chineseHome], ["en/index.html", englishHome.replace(`<link rel="canonical" href="${ORIGIN}/">`, `<link rel="canonical" href="${ORIGIN}/en/">`)]]);
+const assets = new Map([["index.html", englishHome], ["zh/index.html", chineseHome]]);
 
 for (const place of places) {
   for (const lang of ["zh", "en"]) {
@@ -50,12 +50,13 @@ for (const [name, html] of assets) {
   assert.match(html, /hreflang="en"/);
   assert.doesNotMatch(html, /__(?:SUBURB|CRIME)_[A-Z_]+__/);
 }
-assert.equal(urls.length, 3 + places.length * 2);
+assert.equal(urls.length, 2 + places.length * 2);
 assert.equal(new Set(urls).size, urls.length);
 assert.equal(data.rows.length, 926);
 assert.equal(Object.keys(data.labels).length, 62);
 assert.doesNotMatch([...assets.values()].join("\n"), /(?:href|src)="[^"]+\.(?:csv|xlsx|zip)(?:[?#"][^\s]*)/i);
 
+assets.set("en/index.html", await read("seo-legacy-home.html"));
 await fs.mkdir(target, {recursive: true});
 for (const [name, contents] of assets) {
   const destination = path.join(target, ...name.split("/"));
