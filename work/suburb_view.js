@@ -151,14 +151,10 @@ function configureControls(view, render, resetComparison) {
   }
 }
 
-function renderFilterState(view) {
+function updateRegionLabels(view) {
   for (const option of view.region.options) {
     if (option.value) option.textContent = regionLabel(option.value);
   }
-  const labels = [view.region, view.population, view.order]
-    .filter(control => !control.disabled)
-    .map(control => control.selectedOptions[0].text);
-  view["filter-state"].textContent = labels.join(" · ");
 }
 
 function setupViews(rows, view, params) {
@@ -213,7 +209,7 @@ function configureViewLanguage(view, rows, byCode) {
 function start(data) {
   pageLanguage = document.documentElement.lang === "en-AU" ? "en" : "zh";
   const ids = ["coverage", "search", "region", "metric", "population", "order", "results", "result",
-    "reset", "load-more", "filter-state", "suggestions", "lookup-detail"];
+    "reset", "load-more", "suggestions", "lookup-detail"];
   const view = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
   const {rows, labels} = data;
   view.labels = labels;
@@ -235,7 +231,7 @@ function start(data) {
     view.showDetails(row);
   };
   const render = () => {
-    renderFilterState(view);
+    updateRegionLabels(view);
     showSuggestions(view.suggestions, rows, view);
     renderView();
     renderLookup(view);

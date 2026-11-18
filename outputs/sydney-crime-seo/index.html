@@ -69,9 +69,6 @@ button.link{background:none;border:0;padding:0;text-decoration:underline;text-un
 .core-controls{display:flex;gap:8px 16px;align-items:end;flex-wrap:wrap;margin:9px 0}
 .core-controls label{flex:1 1 180px;max-width:300px;min-width:0}
 .core-controls .view-switch{margin:0}
-.filters{margin:6px 0 10px}
-.filters summary{font-size:.85rem}
-.filter-state{margin-left:6px;font-size:.78rem;font-weight:500;color:var(--muted)}
 .controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end;margin:7px 0}
 label{display:flex;flex-direction:column;gap:3px;font-size:.82rem;font-weight:700}
 input,select,.secondary{min-height:43px;border:1px solid #95abb0;border-radius:7px;background:var(--white);padding:6px 10px;width:100%;min-width:0;font-size:.9rem}
@@ -183,15 +180,12 @@ dd{font-variant-numeric:tabular-nums;font-weight:700}
         <button type="button" class="secondary" data-view="map" aria-controls="map-view" aria-pressed="false">Suburb 地图</button>
       </div>
     </div>
-    <details class="filters">
-      <summary><span>筛选</span><span class="filter-state" id="filter-state"></span></summary>
-      <div class="controls">
+    <div class="controls">
         <label>统计区域<select id="region"><option value="">全部区域</option></select></label>
         <label>最低普查人口<select id="population"><option value="0">显示全部</option><option value="500">至少 500 人</option><option value="1000">至少 1,000 人</option><option value="2000" selected>至少 2,000 人</option><option value="5000">至少 5,000 人</option></select></label>
         <label>排序方式<select id="order"><option value="rateHigh">案件率从高到低</option><option value="rateLow">案件率从低到高</option><option value="countHigh">案件数从高到低</option><option value="name">Suburb 名称 A–Z</option></select></label>
         <button class="secondary" id="reset" type="button">重置</button>
-      </div>
-    </details>
+    </div>
     <details class="compare-panel" id="compare-panel" hidden>
       <summary id="compare-count" aria-live="polite"></summary>
       <div id="compare-chips" class="compare-tools"></div>
@@ -1036,14 +1030,10 @@ function configureControls(view, render, resetComparison) {
   }
 }
 
-function renderFilterState(view) {
+function updateRegionLabels(view) {
   for (const option of view.region.options) {
     if (option.value) option.textContent = regionLabel(option.value);
   }
-  const labels = [view.region, view.population, view.order]
-    .filter(control => !control.disabled)
-    .map(control => control.selectedOptions[0].text);
-  view["filter-state"].textContent = labels.join(" · ");
 }
 
 function setupViews(rows, view, params) {
@@ -1098,7 +1088,7 @@ function configureViewLanguage(view, rows, byCode) {
 function start(data) {
   pageLanguage = document.documentElement.lang === "en-AU" ? "en" : "zh";
   const ids = ["coverage", "search", "region", "metric", "population", "order", "results", "result",
-    "reset", "load-more", "filter-state", "suggestions", "lookup-detail"];
+    "reset", "load-more", "suggestions", "lookup-detail"];
   const view = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
   const {rows, labels} = data;
   view.labels = labels;
@@ -1120,7 +1110,7 @@ function start(data) {
     view.showDetails(row);
   };
   const render = () => {
-    renderFilterState(view);
+    updateRegionLabels(view);
     showSuggestions(view.suggestions, rows, view);
     renderView();
     renderLookup(view);
