@@ -34,11 +34,11 @@ function languageLabels(translations, reverse) {
 }
 
 function syncLanguageMetadata() {
-  const pathname = t("/", "/en/");
+  const pathname = t("/zh/", "/");
   document.querySelector('link[rel="canonical"]').href = siteOrigin + pathname;
   document.querySelector('meta[name="description"]').content = pageDescriptions[pageLanguage];
   for (const link of document.querySelectorAll("[data-suburb-link]")) {
-    link.href = `${pathname}suburbs/${link.dataset.suburbLink}/`;
+    link.href = `${t("/", "/en/")}suburbs/${link.dataset.suburbLink}/`;
   }
   if (window.location.protocol !== "file:") {
     const url = new URL(window.location.href);

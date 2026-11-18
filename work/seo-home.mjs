@@ -22,7 +22,6 @@ export function makeEnglishHome(chineseHome, translations, descriptions) {
   });
   html = html.replace('<html lang="zh-Hans">', '<html lang="en-AU">');
   html = html.replace(`<meta name="description" content="${descriptions.zh}">`, `<meta name="description" content="${descriptions.en}">`);
-  html = html.replace(`<link rel="canonical" href="${ORIGIN}/">`, `<link rel="canonical" href="${ORIGIN}/en/">`);
   html = html.replace('data-language="zh" lang="zh-Hans" aria-current="page"', 'data-language="zh" lang="zh-Hans"');
   html = html.replace('data-language="en" lang="en-AU"', 'data-language="en" lang="en-AU" aria-current="page"');
   html = html.replaceAll('href="/suburbs/', 'href="/en/suburbs/');

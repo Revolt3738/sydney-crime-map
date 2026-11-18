@@ -33,7 +33,7 @@ function runScenario(initial) {
   const suburb = mockElement({suburbLink: "chatswood"});
   const canonical = {href: ""};
   const description = {content: ""};
-  const location = {protocol: "https:", href: `https://sydcrime.xdxo.top/${english ? "en/" : ""}?q=Chatswood`};
+  const location = {protocol: "https:", href: `https://sydcrime.xdxo.top/${english ? "" : "zh/"}?q=Chatswood`};
   const window = {location, history: {replaceState(_a, _b, url) { location.href = String(url); }}};
   const document = {
     documentElement: {lang: english ? "en-AU" : "zh-Hans"},
@@ -62,9 +62,9 @@ function runScenario(initial) {
   assert.equal(aria.getAttribute("aria-label"), english ? "页面语言" : "Page language");
   assert.equal(first.getAttribute("aria-current"), "page");
   assert.equal(new URL(location.href).searchParams.get("q"), "Chatswood");
-  assert.equal(new URL(location.href).pathname, english ? "/" : "/en/");
+  assert.equal(new URL(location.href).pathname, english ? "/zh/" : "/");
   assert.equal(suburb.href, english ? "/suburbs/chatswood/" : "/en/suburbs/chatswood/");
-  assert.equal(canonical.href, `https://sydcrime.xdxo.top${english ? "/" : "/en/"}`);
+  assert.equal(canonical.href, `https://sydcrime.xdxo.top${english ? "/zh/" : "/"}`);
   assert.equal(description.content, descriptions[english ? "zh" : "en"]);
   second.onclick(event);
   assert.equal(document.documentElement.lang, english ? "en-AU" : "zh-Hans");

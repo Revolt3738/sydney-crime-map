@@ -26,7 +26,9 @@ const favicon = faviconBytes.toString("base64");
 const schema = JSON.parse(home.match(/<script type="application\/ld\+json">([^]*?)<\/script>/)[1]);
 assert.equal(schema["@type"], "WebSite");
 assert.equal(schema.url, `${ORIGIN}/`);
-const assets = new Map([["index.html", home], ["en/index.html", makeEnglishHome(home, translations, descriptions)]]);
+const englishHome = makeEnglishHome(home, translations, descriptions);
+const chineseHome = home.replace(`<link rel="canonical" href="${ORIGIN}/">`, `<link rel="canonical" href="${ORIGIN}/zh/">`);
+const assets = new Map([["index.html", englishHome], ["zh/index.html", chineseHome], ["en/index.html", englishHome.replace(`<link rel="canonical" href="${ORIGIN}/">`, `<link rel="canonical" href="${ORIGIN}/en/">`)]]);
 
 for (const place of places) {
   for (const lang of ["zh", "en"]) {
@@ -48,7 +50,7 @@ for (const [name, html] of assets) {
   assert.match(html, /hreflang="en"/);
   assert.doesNotMatch(html, /__(?:SUBURB|CRIME)_[A-Z_]+__/);
 }
-assert.equal(urls.length, 2 + places.length * 2);
+assert.equal(urls.length, 3 + places.length * 2);
 assert.equal(new Set(urls).size, urls.length);
 assert.equal(data.rows.length, 926);
 assert.equal(Object.keys(data.labels).length, 62);
@@ -60,6 +62,6 @@ for (const [name, contents] of assets) {
   await fs.mkdir(path.dirname(destination), {recursive: true});
   await fs.writeFile(destination, contents, "utf8");
 }
-await fs.writeFile(path.resolve(work, "../outputs/index.html"), home, "utf8");
+await fs.writeFile(path.resolve(work, "../outputs/index.html"), englishHome, "utf8");
 console.log(`Generated ${assets.size} assets, including ${urls.length} indexable bilingual pages.`);
 console.log(`Deployment directory: ${target}`);

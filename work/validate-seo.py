@@ -139,10 +139,11 @@ def verify_internal_links(doc):
 
 def verify_metadata(doc, relative):
     current = "/" if relative == "index.html" else "/" + relative.removesuffix("index.html")
-    zh = current.removeprefix("/en") if current.startswith("/en/") else current
-    en = "/en/" if zh == "/" else "/en" + zh
+    home = current in ("/", "/zh/", "/en/")
+    zh = "/zh/" if home else (current.removeprefix("/en") if current.startswith("/en/") else current)
+    en = "/" if home else "/en" + zh
     assert doc.canonical == [ORIGIN + current]
-    assert doc.alternates == {"zh-Hans": ORIGIN + zh, "en": ORIGIN + en, "x-default": ORIGIN + zh}
+    assert doc.alternates == {"zh-Hans": ORIGIN + zh, "en": ORIGIN + en, "x-default": ORIGIN + ("/" if home else zh)}
 
 
 def weighted_rate(key):
@@ -189,13 +190,13 @@ def main():
     assert [(row["source"], row["pop"]) for row in ranked] == [(name, population) for _, name, population in LEADERS]
     root = ElementTree.parse(SITE / "sitemap.xml").getroot()
     urls = [element.text for element in root.findall("{http://www.sitemaps.org/schemas/sitemap/0.9}url/{http://www.sitemaps.org/schemas/sitemap/0.9}loc")]
-    assert len(urls) == len(set(urls)) == 2 + 2 * len(PLACES)
+    assert len(urls) == len(set(urls)) == 3 + 2 * len(PLACES)
     expected_files = {urlsplit(url).path.lstrip("/") + "index.html" for url in urls} | {"sitemap.xml"}
     assert {path.relative_to(SITE).as_posix() for path in SITE.rglob("*") if path.is_file()} == expected_files
     for url in urls:
         assert url.startswith(ORIGIN + "/")
         assert (SITE / urlsplit(url).path.lstrip("/") / "index.html").is_file()
-    for relative, expected in (("index.html", "zh-Hans"), ("en/index.html", "en-AU")):
+    for relative, expected in (("index.html", "en-AU"), ("zh/index.html", "zh-Hans"), ("en/index.html", "en-AU")):
         doc = document(relative)
         assert doc.lang == expected and len(doc.headings) == 1
         assert doc.population_entries == [f"{name} {population:,}" for _, name, population in LEADERS]
