@@ -1,11 +1,26 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import {createRequire} from "node:module";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
 import vm from "node:vm";
+import {build} from "esbuild";
 import {selectPlaces} from "./seo-places.mjs";
 import {applyPeriod, periodCopy, translatePeriod} from "./period-copy.mjs";
 import {readSnapshot} from "./snapshot.mjs";
 
 const directory = new URL("./", import.meta.url);
+const require = createRequire(import.meta.url);
+const licenses = [["fast-fuzzy", "LICENSE"], ["graphemesplit", "LICENSE"], ["unicode-trie", "LICENSE"],
+  ["tiny-inflate", "LICENSE"], ["js-base64", "LICENSE.md"]];
+const notices = await Promise.all(licenses.map(async ([name, file]) => {
+  const folder = path.dirname(require.resolve(`${name}/package.json`));
+  return `${name}:\n${await fs.readFile(path.join(folder, file), "utf8")}`;
+}));
+const bundledSearch = await build({entryPoints: [fileURLToPath(new URL("suburb_search.mjs", directory))],
+  bundle: true, platform: "browser", format: "iife", globalName: "SuburbSearch", minify: true, write: false});
+const searchScript = `/* Third-party notices:\n${notices.join("\n\n").replaceAll("*/", "* /")}\n*/\n${bundledSearch.outputFiles[0].text}`;
+assert.doesNotMatch(searchScript, /<\/script/i);
 const [templateCopy, script, rawShapes, mapScript, mapCss, englishCopy, languageScript, gesturesScript, keyboardScript, compareScript, detailsScript, chineseCopy, descriptionCopy] = await Promise.all(
   ["suburb_view.html", "suburb_view.js", "suburb_shapes.json",
     "suburb_map.js", "suburb_map.css", "suburb_english.json", "suburb_language.js",
@@ -58,6 +73,7 @@ const html = template.replace("__SUBURB_DATA__", () => payload)
   .replace("__SUBURB_MAP_SCRIPT__", () => mapScript)
   .replace("__SUBURB_GESTURES_SCRIPT__", () => gesturesScript)
   .replace("__SUBURB_KEYBOARD_SCRIPT__", () => keyboardScript)
+  .replace("__SUBURB_SEARCH_SCRIPT__", () => searchScript)
   .replace("__SUBURB_COMPARE_SCRIPT__", () => compareScript)
   .replace("__SUBURB_DETAILS_SCRIPT__", () => detailsScript)
   .replace("__SUBURB_SCRIPT__", () => script);
@@ -78,23 +94,25 @@ assert.doesNotMatch(html, /__(?:SUBURB|CRIME)_[A-Z_]+__/);
 const start = 'start(JSON.parse(document.getElementById("dataset").textContent));';
 assert.ok(script.trimEnd().endsWith(start));
 const routines = script.trimEnd().slice(0, -start.length);
-vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + keyboardScript + compareScript + detailsScript + routines + `
+await vm.runInNewContext(searchScript + resolvedLanguageScript + mapScript + gesturesScript + keyboardScript + compareScript + detailsScript + routines + `
+  (async () => {
   const compare = filterRows(data.rows, "Blacktown， Kingsford");
   assert.equal(compare.length, 2);
   assert.equal(filterRows(data.rows, "", {region: "Central Coast"}).length, 152);
   assert.equal(filterRows(data.rows, "", {minPopulation: 2000}).length, 602);
   assert.equal(filterRows(data.rows, "Moore Park", {minPopulation: 2000})[0].name, "Moore Park");
-  const gosford = matchingSuggestions(data.rows, "Gosford", []);
+  const gosford = await matchingSuggestions(data.rows, "Gosford", []);
   assert.equal(gosford[0].name, "Gosford");
   assert.ok(gosford.some(row => row.name === "West Gosford"));
-  const chatswood = matchingSuggestions(data.rows, "Chatswood");
+  const chatswood = await matchingSuggestions(data.rows, "Chatswood");
   assert.deepEqual(Array.from(chatswood, row => row.name), ["Chatswood", "Chatswood West"]);
-  const par = matchingSuggestions(data.rows, "  pAr  ");
+  const par = await matchingSuggestions(data.rows, "  pAr  ");
   assert.deepEqual(Array.from(par.slice(0, 2), row => row.name), ["Parklea", "Parramatta"]);
+  assert.equal((await matchingSuggestions(data.rows, "parramata"))[0].name, "Parramatta");
   const examples = [{name:"Spartan"}, {name:"West Park"}, {name:"Parramatta"}, {name:"Par"}];
-  assert.deepEqual(Array.from(matchingSuggestions(examples, "par"), row => row.name),
+  assert.deepEqual(Array.from(await matchingSuggestions(examples, "par"), row => row.name),
     ["Par", "Parramatta", "West Park", "Spartan"]);
-  assert.equal(matchingSuggestions(data.rows, "par，gosford").length, 0);
+  assert.equal((await matchingSuggestions(data.rows, "par，gosford")).length, 0);
   assert.equal(filterRows(data.rows, "Chatswood", {minPopulation: 2000}).length, 1);
   assert.equal(filterRows(data.rows, "Chatswood West", {minPopulation: 2000})[0].pop, 1521);
   const choices = new Map([...chatswood, ...gosford].map(row => [row.code, row]));
@@ -266,7 +284,8 @@ vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + keyboar
   assert.equal(regionLabel("Sydney - City and Inner South"), "悉尼 — 市中心及内南区");
   assert.equal(offenceLabel("Murder *"), "谋杀 *");
   assert.notEqual(offenceLabel("Break and enter dwelling"), offenceLabel("Steal from dwelling"));
-`, {data, shapes, assert, URL, chineseDataLabels, DOMPoint: class {
+  })()
+`, {data, shapes, assert, URL, chineseDataLabels, performance, setTimeout, DOMPoint: class {
   constructor(x, y) { this.x = x; this.y = y; }
   matrixTransform() { return this; }
 }});

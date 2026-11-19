@@ -31,6 +31,11 @@ header{border-block:5px solid var(--ink) 1px;padding:20px 0 25px}
 .compare-tools button{padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:#edf4f4;text-align:left}
 .suggestions-list{display:grid;gap:4px;margin:8px 0}
 .suggestions-list:empty{display:none}
+.suggestion-note{margin:0;color:var(--muted);font-size:.9rem}
+.suggestion-note:empty{display:none}
+.similar-suggestions{display:grid;gap:4px}
+.similar-suggestions[hidden]{display:none}
+.similar-toggle{justify-self:start;min-height:48px}
 .suggestion-row{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:5px 8px;background:#f1f6f6;border-radius:7px}
 .suggestion-name{min-width:0;overflow-wrap:anywhere}
 .area-actions{display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap;justify-content:flex-end}
@@ -177,9 +182,9 @@ dd{font-variant-numeric:tabular-nums;font-weight:700}
 
   <section class="explorer" id="explorer" aria-labelledby="explorer-title">
     <h2 id="explorer-title">Find and compare suburbs</h2>
-    <label class="search-label" for="search">Search suburbs<input id="search" type="search" placeholder="Blacktown, Kingsford, Gosford" autocomplete="off" aria-controls="suggestions results"></label>
-    <div id="suggestions" class="suggestions-list" aria-label="Suburb suggestions for comparison"></div>
-    <p class="intro muted search-help">Search a suburb to view or compare it. Use commas to search for multiple suburbs.</p>
+    <p id="search-help" class="intro muted search-help">Search a suburb to view or compare it. Use commas to search for multiple suburbs.</p>
+    <label class="search-label" for="search">Search suburbs<input id="search" type="search" placeholder="Blacktown, Kingsford, Gosford" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-controls="suggestions results" aria-describedby="search-help"></label>
+    <div id="suggestions" class="suggestions-list"></div>
     <div class="core-controls">
       <label for="metric">Crime measure<select id="metric"><option value="non_dv">Non-domestic assault</option><option value="burglary">Residential break-ins</option><option value="assault">Total assault</option><option value="violent">Violent crime</option></select></label>
       <div class="view-switch" aria-label="View">
@@ -778,6 +783,114 @@ function configureMapKeyboard(map) {
   });
 }
 
+/* Third-party notices:
+fast-fuzzy:
+Copyright Ethan Rutherford
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+graphemesplit:
+MIT License
+
+Copyright (c) 2019-2022 Nao Yonashiro
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+unicode-trie:
+Copyright 2018
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+tiny-inflate:
+MIT License
+
+Copyright (c) 2015-present Devon Govett
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+js-base64:
+Copyright (c) 2014, Dan Kogai
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of {{{project}}} nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+var SuburbSearch=(()=>{var ht=Object.create;var D=Object.defineProperty;var dt=Object.getOwnPropertyDescriptor;var bt=Object.getOwnPropertyNames;var gt=Object.getPrototypeOf,vt=Object.prototype.hasOwnProperty;var w=(e,n)=>()=>{try{return n||e((n={exports:{}}).exports,n),n.exports}catch(t){throw n=0,t}},xt=(e,n)=>{for(var t in n)D(e,t,{get:n[t],enumerable:!0})},xe=(e,n,t,r)=>{if(n&&typeof n=="object"||typeof n=="function")for(let o of bt(n))!vt.call(e,o)&&o!==t&&D(e,o,{get:()=>n[o],enumerable:!(r=dt(n,o))||r.enumerable});return e};var mt=(e,n,t)=>(t=e!=null?ht(gt(e)):{},xe(n||!e||!e.__esModule?D(t,"default",{value:e,enumerable:!0}):t,e)),pt=e=>xe(D({},"__esModule",{value:!0}),e);var pe=w((yn,me)=>{me.exports={Other:0,CR:1,LF:2,Control:4,Extend:8,ZWJ:16,Regional_Indicator:32,Prepend:64,SpacingMark:128,L:256,V:512,T:1024,LV:2048,LVT:4096,Extended_Pictographic:8192,InCB_Linker:16384,InCB_Consonant:32768,InCB_Extend:65536}});var Ae=w((In,At)=>{At.exports={data:"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"}});var ye=w((wn,yt)=>{yt.exports={data:"AAACAAAAAACAOAAAAbYBSf7t2S1IBEEYBuDVDZ7FYrQMNsFiu3hgEYOI0SCXRIUrB8JhEZtgs5gEg1GMFk02m82oGI02m+9xezCOczv/uwv3fvAwc/PzfXOzcdqzWdaBDdiGPdiHdjE+DS3RNDuCfsn8idQ/g3OH3BdwKf0e96/gumTfYcncLdzBPTzAo+RZ+f0Cr/AG7/AJX4738x1wtz9FO5PX/50n6UXMNdfg/0lERERERERERERERETpdedHBvDRql4nq0cXtW9af98qdRby0Vvp8K4W0V+C5Xw0t4J2bfjeBp3cnEu1brnnCTYNa7eKdz91XP7WO9Lb4GqRb7cY6xbtAdqeVOsY/QGcevw/tb6OT85YhvfKYEx9CMuxKsKnrs+eJtVInVvHJ0eVYVvTZk2siFVLOCjb61PTZX3MdVWEyP7fjzpmMxdzTyq2Ebue6x61nXRGnzndWpf1an7dXmGYE4Y1ptqqKsK1nu26Ju0ty+maV2Rpvk+qnDZjKUIobUiesdAQE/jmCTmHmsskpFZsVYbtmXRcaoSGUPomunW2derQhDPFjtT1Q/eb8vnm990fq35oHVt11bU9m89c7DNI8Qs="}});var Ie=w((Un,It)=>{It.exports={data:"AAgOAAAAAABQfgAAAWMGnPntmm2IVUUYx+dyb2ezXXtBiSCLsKDIiKIIoYINciGwQHrRL2Ufii0qMsv7QVBuQkXhkmW5gksQRhRFSBslbkllHyy3L2XllkXrB3uhF0tQ0Kj+xzN3d3buzJx5PeesOw/8mDNvz/PMnOc8s/fs6asTcgu4A9wF+mjdV9kEa8FqsE5j/DPgeUX/JvASeBW8Bd4GO8CHYDcz7nPwFRgD4+An8Cf4AxwBx0G9QcjrYBt4p5HN/YDqGEF9F7gW3AC6wU1gCVgK5oDlYA8YBXvBGOgHD4FzwSo6fg24EDwBxsEB8Cu1N4ByI1gA/gbfo+0wyuO0vgW8DK5i+tN5tVOyMmUWrs9k6nNxPY/WL0B5Mb2+HOU14HrwY2Ny/CLUbwa3gzsZPT7ZGECnDvdiPQ+ARyhpWxPlWnr9JLfeAdS/43S8qNiTIdq3FeUb9HolOEj7h9H2LtgJPgHr0TZKx31Jy30C/T+g7aDCbpPiuj/fStrTNfQGioWIHr9z+z8iiAEfdg4zdo7Gex6JRCKRSCQSiUQikYrzL367HmLq8zV+yyYJIbOTzva5aJtH2y9CuYBebwdX4PoYyv107ELUe5PsPWBavzHJ3tMtFuhluTWnPxKJRCKRSCQy/TjQCKt/XX3y/+o6HPJs35XNszPO0WQf+FnQfsnpU+vLUN8MdgNyRtZ2Ncp7wBDYDn4D47MIOes0QpaADeDUWsYe5pql3k3IZd3iPp4H6bjnUI6Cf8B1PYQ0wWCPno5IJBKJnJx83eN2fi7NeYd0jKsvr+A7p3749KzkXd2Ap+9R7qfrflhz/ava45m2I7Rcw+lI3/WtAO+Bx5PsG6+nk+xbv7Q/fWe4gc7ZRPu3oNzK6Hktmfy2r036vc82On44yb4ZHKFzPkL5aZJ9f9hH7Y8y+nbheq9irWOpf0z/L8nUWPmL6TuK6/8Uuhpd6r3sRv8cbszZXZm981HOB5fS/itzdIlYyMzpTa85HYtRv422LTPQ/yjd+/SZudvCr1DcV5Iv6W+HFRXaB988Rte2ugJrHKTPW4vx5akK+MWzvoI++Sb9zvKFriy/m8wbwpxXQL/gDNs5Tb+zTPfiza6sHEa5A3w8jWLgM/j6BePvoOBcM33+v6Hj9zvuQ978lR5ihl/bedM0DvN4vwI+NOvy7/SbCkze51WVRfXaCaJEmdlSm+H4lKLsVE3Kvoe2950tZdcnu5T1rISQKuaHovZNZw26/aKxvn0tS6oUG1WWmbAPvtbGjzPU2WvgV4uoEc7PkQ77MhHoYu1K7YvOVhv7uuJ7/QpdLcKtX2ZPthc1A/tEcK/zbAW+/0rbnqRVAlPuk0gC5b5cv1Q+BbIp8kGnX2VjQmT7bLm/Hfp1RfZ3kAdpGZI3h2iMnZCC47ftj+351WJ06PTLxk6I7OxxWH8rd4RCRHHuKC1DbOaIdJyQAn4vuPpqS8d5HVJUfy+p2lXjihIbuya/L2wowkae3TJEZFfmjywnBshRSl9s9Je1v7z9kL7bPE9Fi+xMlf09Z3Ne2KxNFu8qf2x02ojMD9McrpOLivTX9j6F9l/HfmgbotKnfp9nJCHqffFho0hcxWRNhHTarUI8h94PGx28Pp2xrrZ8SehcFToPhvabvbZ5JkXx4etZd4lZfn0+pIz8oMoRunpsbPgUUZ4NaYu1qcr9vC+2MWsa8yHOPlOxfU7L9Fnkg0t+0dGdZ9O38PGr6nPxwzRWXUX0/JmSN09kU+WPyD8f4jM+ioo7lW1femzuv0iXqi5r8yGq/fBts+gca/M8+orLvOc0RJ7P88c0J/m2L/OFbzfVa5LrXc4WH2NsbJrulcsafa+T99lFVwgpwr7JMy47U3T0FiFF56uQuss4j3gfbOb68sUlB6vOjaLPtrbdkLp9nZmqffcpqnurk4NU+oq8rzIx2Xddv8tel+peydar+htBpIufH0J4O2XFCCu2z0GZayjyDMzLS6Z+yGK1Sjmk7RNbtq91zrXQfumeOb58MdGTtxdlngmyc09nTlmxqfMcmvij67OJXV3R3dOQsZznh6qfkOL80M3BuvtW1B7yY2R+FLG/MsnzVXd+aF9VuUk1xzWudPwy1edzz1x8t9UfyndbHTY2yxTdHOCa92zj3CR+Te6fjzX5Ftf9M/E1VC4yzVehROa77/h09cmXb6Zxm2c3pPjSH9bn/wE="}});var Te=w((Cn,Ee)=>{var Y=0,ze=-3;function k(){this.table=new Uint16Array(16),this.trans=new Uint16Array(288)}function wt(e,n){this.source=e,this.sourceIndex=0,this.tag=0,this.bitcount=0,this.dest=n,this.destLen=0,this.ltree=new k,this.dtree=new k}var Be=new k,Le=new k,$=new Uint8Array(30),ee=new Uint16Array(30),Se=new Uint8Array(30),Pe=new Uint16Array(30),Ut=new Uint8Array([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]),we=new k,p=new Uint8Array(320);function Re(e,n,t,r){var o,i;for(o=0;o<t;++o)e[o]=0;for(o=0;o<30-t;++o)e[o+t]=o/t|0;for(i=r,o=0;o<30;++o)n[o]=i,i+=1<<e[o]}function Ct(e,n){var t;for(t=0;t<7;++t)e.table[t]=0;for(e.table[7]=24,e.table[8]=152,e.table[9]=112,t=0;t<24;++t)e.trans[t]=256+t;for(t=0;t<144;++t)e.trans[24+t]=t;for(t=0;t<8;++t)e.trans[168+t]=280+t;for(t=0;t<112;++t)e.trans[176+t]=144+t;for(t=0;t<5;++t)n.table[t]=0;for(n.table[5]=32,t=0;t<32;++t)n.trans[t]=t}var Ue=new Uint16Array(16);function Q(e,n,t,r){var o,i;for(o=0;o<16;++o)e.table[o]=0;for(o=0;o<r;++o)e.table[n[t+o]]++;for(e.table[0]=0,i=0,o=0;o<16;++o)Ue[o]=i,i+=e.table[o];for(o=0;o<r;++o)n[t+o]&&(e.trans[Ue[n[t+o]]++]=o)}function zt(e){e.bitcount--||(e.tag=e.source[e.sourceIndex++],e.bitcount=7);var n=e.tag&1;return e.tag>>>=1,n}function A(e,n,t){if(!n)return t;for(;e.bitcount<24;)e.tag|=e.source[e.sourceIndex++]<<e.bitcount,e.bitcount+=8;var r=e.tag&65535>>>16-n;return e.tag>>>=n,e.bitcount-=n,r+t}function j(e,n){for(;e.bitcount<24;)e.tag|=e.source[e.sourceIndex++]<<e.bitcount,e.bitcount+=8;var t=0,r=0,o=0,i=e.tag;do r=2*r+(i&1),i>>>=1,++o,t+=n.table[o],r-=n.table[o];while(r>=0);return e.tag=i,e.bitcount-=o,n.trans[t+r]}function Bt(e,n,t){var r,o,i,s,u,l;for(r=A(e,5,257),o=A(e,5,1),i=A(e,4,4),s=0;s<19;++s)p[s]=0;for(s=0;s<i;++s){var f=A(e,3,0);p[Ut[s]]=f}for(Q(we,p,0,19),u=0;u<r+o;){var b=j(e,we);switch(b){case 16:var L=p[u-1];for(l=A(e,2,3);l;--l)p[u++]=L;break;case 17:for(l=A(e,3,3);l;--l)p[u++]=0;break;case 18:for(l=A(e,7,11);l;--l)p[u++]=0;break;default:p[u++]=b;break}}Q(n,p,0,r),Q(t,p,r,o)}function Ce(e,n,t){for(;;){var r=j(e,n);if(r===256)return Y;if(r<256)e.dest[e.destLen++]=r;else{var o,i,s,u;for(r-=257,o=A(e,$[r],ee[r]),i=j(e,t),s=e.destLen-A(e,Se[i],Pe[i]),u=s;u<s+o;++u)e.dest[e.destLen++]=e.dest[u]}}}function Lt(e){for(var n,t,r;e.bitcount>8;)e.sourceIndex--,e.bitcount-=8;if(n=e.source[e.sourceIndex+1],n=256*n+e.source[e.sourceIndex],t=e.source[e.sourceIndex+3],t=256*t+e.source[e.sourceIndex+2],n!==(~t&65535))return ze;for(e.sourceIndex+=4,r=n;r;--r)e.dest[e.destLen++]=e.source[e.sourceIndex++];return e.bitcount=0,Y}function St(e,n){var t=new wt(e,n),r,o,i;do{switch(r=zt(t),o=A(t,2,0),o){case 0:i=Lt(t);break;case 1:i=Ce(t,Be,Le);break;case 2:Bt(t,t.ltree,t.dtree),i=Ce(t,t.ltree,t.dtree);break;default:i=ze}if(i!==Y)throw new Error("Data error")}while(!r);return t.destLen<t.dest.length?typeof t.dest.slice=="function"?t.dest.slice(0,t.destLen):t.dest.subarray(0,t.destLen):t.dest}Ct(Be,Le);Re($,ee,4,3);Re(Se,Pe,2,1);$[28]=0;ee[28]=258;Ee.exports=St});var _e=w((zn,ke)=>{var Pt=new Uint8Array(new Uint32Array([305419896]).buffer)[0]===18,Oe=(e,n,t)=>{let r=e[n];e[n]=e[t],e[t]=r},Rt=e=>{let n=e.length;for(let t=0;t<n;t+=4)Oe(e,t,t+3),Oe(e,t+1,t+2)},Et=e=>{Pt&&Rt(e)};ke.exports={swap32LE:Et}});var Xe=w((Bn,We)=>{var Fe=Te(),{swap32LE:Tt}=_e(),re=11,B=5,Ot=re-B,kt=65536>>re,_t=1<<Ot,Ft=_t-1,W=2,Dt=1<<B,te=Dt-1,De=65536>>B,Wt=1024>>B,Xt=De+Wt,Vt=Xt,Nt=32,Mt=Vt+Nt,Zt=1<<W,ne=class{constructor(n){let t=typeof n.readUInt32BE=="function"&&typeof n.slice=="function";if(t||n instanceof Uint8Array){let r;if(t)this.highStart=n.readUInt32LE(0),this.errorValue=n.readUInt32LE(4),r=n.readUInt32LE(8),n=n.slice(12);else{let o=new DataView(n.buffer);this.highStart=o.getUint32(0,!0),this.errorValue=o.getUint32(4,!0),r=o.getUint32(8,!0),n=n.subarray(12)}n=Fe(n,new Uint8Array(r)),n=Fe(n,new Uint8Array(r)),Tt(n),this.data=new Uint32Array(n.buffer)}else({data:this.data,highStart:this.highStart,errorValue:this.errorValue}=n)}get(n){let t;return n<0||n>1114111?this.errorValue:n<55296||n>56319&&n<=65535?(t=(this.data[n>>B]<<W)+(n&te),this.data[t]):n<=65535?(t=(this.data[De+(n-55296>>B)]<<W)+(n&te),this.data[t]):n<this.highStart?(t=this.data[Mt-kt+(n>>re)],t=this.data[t+(n>>B&Ft)],t=(t<<W)+(n&te),this.data[t]):this.data[this.data.length-Zt]}};We.exports=ne});var Ne=w((X,Ve)=>{(function(e,n){typeof X=="object"&&typeof Ve<"u"?n(X):typeof define=="function"&&define.amd?define(["exports"],n):(e=typeof globalThis<"u"?globalThis:e||self,(function(){var t=e.Base64,r=e.Base64={};n(r),r.noConflict=function(){return e.Base64=t,r}})())})(X,(function(e){"use strict";var n="3.9.7",t=n,r=typeof TextDecoder=="function"?new TextDecoder("utf-8",{ignoreBOM:!0}):void 0,o=typeof TextEncoder=="function"?new TextEncoder:void 0,i="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",s=Array.prototype.slice.call(i),u=(function(a){var c={};return a.forEach(function(g,v){return c[g]=v}),c})(s),l=/^(?:[A-Za-z\d+\/]{4})*?(?:[A-Za-z\d+\/]{2}(?:==)?|[A-Za-z\d+\/]{3}=?)?$/,f=String.fromCharCode.bind(String),b=function(a){return a.replace(/=/g,"").replace(/[+\/]/g,function(c){return c=="+"?"-":"_"})},L=function(a){return a.replace(/[^A-Za-z0-9\+\/]/g,"")},E=function(a){for(var c,g,v,x,I="",J=a.length%3,F=0;F<a.length;){if((g=a.charCodeAt(F++))>255||(v=a.charCodeAt(F++))>255||(x=a.charCodeAt(F++))>255)throw new TypeError("invalid character found");c=g<<16|v<<8|x,I+=s[c>>18&63]+s[c>>12&63]+s[c>>6&63]+s[c&63]}return J?I.slice(0,J-3)+"===".substring(J):I},z=typeof btoa=="function"?function(a){return btoa(a)}:E,S=typeof Uint8Array.prototype.toBase64=="function"?Function.prototype.call.bind(Uint8Array.prototype.toBase64):function(a){for(var c=4096,g=[],v=0,x=a.length;v<x;v+=c)g.push(f.apply(null,a.subarray(v,v+c)));return z(g.join(""))},y=function(a,c){return c===void 0&&(c=!1),c?b(S(a)):S(a)},T=function(a){if(a.length<2){var c=a.charCodeAt(0);return c<128?a:c<2048?f(192|c>>>6)+f(128|c&63):f(224|c>>>12&15)+f(128|c>>>6&63)+f(128|c&63)}else{var c=65536+(a.charCodeAt(0)-55296)*1024+(a.charCodeAt(1)-56320);return f(240|c>>>18&7)+f(128|c>>>12&63)+f(128|c>>>6&63)+f(128|c&63)}},P=/[\uD800-\uDBFF][\uDC00-\uDFFF]|[^\x00-\x7F]/g,U=function(a){return a.replace(P,T)},C=o?function(a){return S(o.encode(a))}:function(a){return z(U(a))},m=function(a,c){return c===void 0&&(c=!1),c?b(C(a)):C(a)},R=function(a){return m(a,!0)},M=/[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}/g,ut=function(a){switch(a.length){case 4:var c=(7&a.charCodeAt(0))<<18|(63&a.charCodeAt(1))<<12|(63&a.charCodeAt(2))<<6|63&a.charCodeAt(3),g=c-65536;return f((g>>>10)+55296)+f((g&1023)+56320);case 3:return f((15&a.charCodeAt(0))<<12|(63&a.charCodeAt(1))<<6|63&a.charCodeAt(2));default:return f((31&a.charCodeAt(0))<<6|63&a.charCodeAt(1))}},Z=function(a){return a.replace(M,ut)},H=function(a){if(a=a.replace(/\s+/g,""),!l.test(a))throw new TypeError("malformed base64.");a+="==".slice(2-(a.length&3));for(var c,g,v,x=[],I=0;I<a.length;)c=u[a.charAt(I++)]<<18|u[a.charAt(I++)]<<12|(g=u[a.charAt(I++)])<<6|(v=u[a.charAt(I++)]),g===64?x.push(f(c>>16&255)):v===64?x.push(f(c>>16&255,c>>8&255)):x.push(f(c>>16&255,c>>8&255,c&255));return x.join("")},_=typeof atob=="function"?function(a){return atob(L(a))}:H,he=typeof Uint8Array.fromBase64=="function"?function(a){return Uint8Array.fromBase64(a)}:function(a){for(var c=_(a),g=c.length,v=new Uint8Array(g),x=0;x<g;x++)v[x]=c.charCodeAt(x);return v},K=function(a){return he(de(a))},ft=r?function(a){return r.decode(he(a))}:function(a){return Z(_(a))},de=function(a){return L(a.replace(/[-_]/g,function(c){return c=="-"?"+":"/"}))},O=function(a){return ft(de(a))},be=function(a){if(typeof a!="string")return!1;var c=a.replace(/\s+/g,"").replace(/={0,2}$/,"");return c.length%4===1?!1:!/[^\s0-9a-zA-Z\+/]/.test(c)||!/[^\s0-9a-zA-Z\-_]/.test(c)},ge=function(a){return{value:a,enumerable:!1,writable:!0,configurable:!0}},q=function(){var a=function(c,g){return Object.defineProperty(String.prototype,c,ge(g))};a("fromBase64",function(){return O(this)}),a("toBase64",function(c){return m(this,c)}),a("toBase64URI",function(){return m(this,!0)}),a("toBase64URL",function(){return m(this,!0)}),a("toUint8Array",function(){return K(this)})},G=function(){var a=function(c,g){return Object.defineProperty(Uint8Array.prototype,c,ge(g))};a("toBase64",function(c){return y(this,c)}),a("toBase64URI",function(){return y(this,!0)}),a("toBase64URL",function(){return y(this,!0)})},ve=function(){q(),G()},lt={version:n,VERSION:t,atob:_,atobPolyfill:H,btoa:z,btoaPolyfill:E,fromBase64:O,toBase64:m,encode:m,encodeURI:R,encodeURL:R,utob:U,btou:Z,decode:O,isValid:be,fromUint8Array:y,toUint8Array:K,extendString:q,extendUint8Array:G,extendBuiltins:ve};e.Base64=lt,e.VERSION=t,e.atob=_,e.atobPolyfill=H,e.btoa=z,e.btoaPolyfill=E,e.btou=Z,e.decode=O,e.encode=m,e.encodeURI=R,e.encodeURL=R,e.extendBuiltins=ve,e.extendString=q,e.extendUint8Array=G,e.fromBase64=O,e.fromUint8Array=y,e.isValid=be,e.toBase64=m,e.toUint8Array=K,e.utob=U,e.version=n}))});var Ze=w((Ln,Me)=>{var h=pe(),Ht=Ae().data,Kt=ye().data,qt=Ie().data,oe=Xe(),ie=Ne().Base64,Gt=new oe(ie.toUint8Array(Ht)),Jt=new oe(ie.toUint8Array(Kt)),Qt=new oe(ie.toUint8Array(qt));function d(e,n){return(e&n)!==0}function jt(e,n,t){let r=n.length;for(let o=t;o+1<r;o++){let i=n[o+0],s=n[o+1];switch(e.gb9c){case 0:d(i,h.InCB_Consonant)&&(e.gb9c=1);break;case 1:d(i,h.InCB_Extend)?e.gb9c=1:d(i,h.InCB_Linker)?e.gb9c=2:e.gb9c=d(i,h.InCB_Consonant)?1:0;break;case 2:d(i,h.InCB_Extend|h.InCB_Linker)?e.gb9c=2:e.gb9c=d(i,h.InCB_Consonant)?1:0;break}switch(e.gb11){case 0:d(i,h.Extended_Pictographic)&&(e.gb11=1);break;case 1:d(i,h.Extend)?e.gb11=1:d(i,h.ZWJ)?e.gb11=2:e.gb11=d(i,h.Extended_Pictographic)?1:0;break;case 2:e.gb11=d(i,h.Extended_Pictographic)?1:0;break}switch(e.gb12){case 0:d(i,h.Regional_Indicator)?e.gb12=1:e.gb12=-1;break;case 1:d(i,h.Regional_Indicator)?e.gb12=0:e.gb12=-1;break}switch(e.gb13){case 0:d(i,h.Regional_Indicator)||(e.gb13=1);break;case 1:d(i,h.Regional_Indicator)?e.gb13=2:e.gb13=1;break;case 2:e.gb13=1;break}if(!(d(i,h.CR)&&d(s,h.LF))){if(d(i,h.Control|h.CR|h.LF)||d(s,h.Control|h.CR|h.LF))return o+1-t;if(!(d(i,h.L)&&d(s,h.L|h.V|h.LV|h.LVT))&&!(d(i,h.LV|h.V)&&d(s,h.V|h.T))&&!(d(i,h.LVT|h.T)&&d(s,h.T))&&!d(s,h.Extend|h.ZWJ)&&!d(s,h.SpacingMark)&&!d(i,h.Prepend)&&!(d(s,h.InCB_Consonant)&&e.gb9c===2)&&!(d(s,h.Extended_Pictographic)&&e.gb11===2)&&!(d(s,h.Regional_Indicator)&&e.gb12===1)&&!(d(s,h.Regional_Indicator)&&e.gb13===2))return o+1-t}}return r-t}Me.exports=function(n){let t=[],r=[0],o=[];for(let s=0;s<n.length;){let u=n.codePointAt(s);o.push(Gt.get(u)|Jt.get(u)|Qt.get(u)),s+=u>65535?2:1,r.push(s)}let i={gb9c:0,gb11:0,gb12:0,gb13:0};for(let s=0;s<o.length;){let u=jt(i,o,s),l=r[s],f=r[s+u];t.push(n.slice(l,f)),s+=u}return t}});var pn={};xt(pn,{canSearch:()=>st,fuzzySuggestions:()=>mn});var Ge=mt(Ze(),1),Yt=e=>e.normalize("NFKD").split(""),He=/^\s+$/,Ke=/^[`~!@#$%^&*()\-=_+{}[\]\|\\;':",./<>?]+$/,ae={insertOrder:"insertOrder",bestMatch:"bestMatch"},Je={keySelector:e=>e,threshold:.6,ignoreCase:!0,ignoreSymbols:!0,normalizeWhitespace:!0,returnMatchData:!1,useDamerau:!0,useSellers:!0,useSeparatedUnicode:!1,sortBy:ae.bestMatch},Qe=()=>{},$t=e=>e instanceof Array?e:[e];function V(e,n){let t=n.ignoreCase?e.toLocaleLowerCase():e,r=[],o=[],i=!0,s=0,u=n.useSeparatedUnicode?Yt(t):(0,Ge.default)(t);for(let l of u)He.lastIndex=0,Ke.lastIndex=0,n.normalizeWhitespace&&He.test(l)?i||(r.push(" "),o.push(s),i=!0):n.ignoreSymbols&&Ke.test(l)||(n.useSeparatedUnicode?r.push(l):r.push(l.normalize()),o.push(s),i=!1),s+=l.length;for(o.push(e.length);r[r.length-1]===" ";)r.pop(),o.pop();return{original:e,normal:r,map:o}}function je(e,n){return{index:n[e.start],length:n[e.end+1]-n[e.start]}}function se(e,n){if(n===0)return{index:0,length:0};let t=n;for(let r=e.length-2;r>0&&t>1;r--){let o=e[r];t=o[t]<o[t-1]?t:t-1}return{start:t-1,end:n-1}}function en(){return{start:0,end:0}}var tn=()=>!0,nn=(e,n)=>e<n;function rn(e,n){let r=e[e.length-1][n-1],o=Math.max(e.length,n);return{score:1-r/(o-1),scoreIndex:n-1}}function on(e,n){if(e.length===1)return{score:1,scoreIndex:0};let t=e[e.length-1],r=t[0],o=0;for(let i=1;i<n;i++){let s=t[i];s<r&&(r=s,o=i)}return{score:1-r/(e.length-1),scoreIndex:o}}function Ye(e,n){let t=new Array(e);for(let r=0;r<e;r++)t[r]=new Array(n),t[r][0]=r;for(let r=0;r<n;r++)t[0][r]=r;return t}function $e(e,n){let t=new Array(e);t[0]=new Array(n).fill(0);for(let r=1;r<e;r++)t[r]=new Array(n),t[r][0]=r;return t}function et(e,n,t,r,o){let i=t[r],s=t[r+1],u=e[r]===n[o]?0:1,l,f=s[o]+1;(l=i[o+1]+1)<f&&(f=l),(l=i[o]+u)<f&&(f=l),s[o+1]=f}function ce(e,n,t,r){for(let o=0;o<e.length;o++)et(e,n,t,o,r)}function tt(e,n,t,r){if(r===0){ce(e,n,t,r);return}e.length>0&&et(e,n,t,0,r);for(let o=1;o<e.length;o++){let i=t[o-1],s=t[o],u=t[o+1],l=e[o]===n[r]?0:1,f,b=u[r]+1;(f=s[r+1]+1)<b&&(b=f),(f=s[r]+l)<b&&(b=f),e[o]===n[r-1]&&e[o-1]===n[r]&&(f=i[r-1]+l)<b&&(b=f),u[r+1]=b}}function an(e,n,t){let r=e;for(let o=0;o<n.length;o++){let i=n[o];r.children[i]==null&&(r.children[i]={children:{},candidates:[],depth:0}),r.depth=Math.max(r.depth,n.length-o),r=r.children[i]}r.candidates.push(t)}function qe(e,n,t,r){for(let o of t){let i=$t(r.keySelector(o)).map((s,u)=>({index:n,keyIndex:u,item:o,normalized:V(s,r)}));n++;for(let s of i)an(e,s.normalized.normal,s)}}function sn(e,n){let t=n.score-e.score;if(t!==0)return t;let r=e.match.start-n.match.start;if(r!==0)return r;let o=e.keyIndex-n.keyIndex;if(o!==0)return o;let i=e.lengthDiff-n.lengthDiff;return i!==0?i:nt(e,n)}function nt(e,n){return e.index-n.index}function cn(e){switch(e){case ae.bestMatch:return sn;case ae.insertOrder:return nt;default:throw new Error(`unknown sortBy method ${e}`)}}function rt(e,n,t,r,o,i,s){let u={item:t.item,normalized:t.normalized,score:r,match:o,index:t.index,keyIndex:t.keyIndex,lengthDiff:i};n[t.index]==null?(n[t.index]=e.length,e.push(u)):s(u,e[n[t.index]])<0&&(e[n[t.index]]=u)}var un=Math.max,fn=e=>e;function ln(e,n,t,r,o){let i=n+o,s=Math.min(t.length,n+e.depth+1),u=Math.ceil((i+s)/2);return 1-(u-s)/u>=r}function hn(e,n,t,r,o,i){return 1-Math.min(o,i-(e.depth+1))/t.length>=r}function dn(e,n,t,r,o,i,s){let u=[];for(let f in e.children){let b=e.children[f];u.push([b,1,f,0,n.length])}let l=new Array(e.depth);for(;u.length!==0;){let[f,b,L,E,z]=u.pop();l[b-1]=L,t.score(n,l,r,b-1);let S=b,y=r[r.length-1][S],T=E,P=z;if(t.shouldUpdateScore(y,z)&&(T=S,P=y),f.candidates.length>0){let U=t.getLength(n.length,b),C=1-P/U;if(C>=s.threshold){let m=se(r,T),R=Math.abs(b-n.length);for(let M of f.candidates)rt(o,i,M,C,m,R,t.compareItems)}}for(let U in f.children){let C=f.children[U];t.shouldContinue(C,b,n,s.threshold,P,y)&&u.push([C,b+1,U,T,P])}}}function bn(e,n,t){let r=t.useSellers?$e:Ye,o={score:t.useDamerau?tt:ce,getLength:t.useSellers?fn:un,shouldUpdateScore:t.useSellers?nn:tn,shouldContinue:t.useSellers?hn:ln,walkBack:t.useSellers?se:en,compareItems:cn(t.sortBy)},i={},s=[],u=r(e.length+1,n.depth+1);if(t.threshold<=0||e.length===0)for(let f of n.candidates)rt(s,i,f,0,{index:0,length:0},e.length,o.compareItems);dn(n,e,o,u,s,i,t);let l=s.sort(o.compareItems);if(t.returnMatchData){let f=t.useSellers?je:Qe;return l.map(b=>({item:b.item,original:b.normalized.original,key:b.normalized.normal.join(""),score:b.score,match:f(b.match,b.normalized.map)}))}return l.map(f=>f.item)}function ot(e,n,t){t={...Je,...t};let r=t.useSellers?$e:Ye,o=t.useDamerau?tt:ce,i=t.useSellers?on:rn;e=V(e,t).normal;let s=V(n,t),u=r(e.length+1,s.normal.length+1);for(let f=0;f<s.normal.length;f++)o(e,s.normal,u,f);let l=i(u,s.normal.length+1);return t.returnMatchData?{item:n,original:s.original,key:s.normal.join(""),score:l.score,match:t.useSellers?je(se(u,l.scoreIndex),s.map):Qe()}:l.score}var N=class{constructor(n,t){this.options=Object.assign({},Je,t),this.trie={children:{},candidates:[],depth:0},qe(this.trie,0,n,this.options),this.count=n.length}add(...n){qe(this.trie,this.count,n,this.options),this.count+=n.length}search(n,t){return t=Object.assign({},this.options,t),bn(V(n,this.options).normal,this.trie,t)}};var ue=new WeakMap,at=.7,it=8,le=e=>(e??"").trim().toLowerCase(),fe=e=>(le(e).match(/[\p{L}\p{N}]+/gu)??[]).sort().join(" ");function st(e){let n=le(e);return!/[,，]/u.test(n)&&n.replace(/[^\p{L}\p{N}]/gu,"").length>=4}async function gn(){return globalThis.scheduler?.yield?globalThis.scheduler.yield():new Promise(e=>setTimeout(e,0))}async function ct(e,n){let t=new N([],n),r=performance.now()+8;for(let o=0;o<e.length;o+=32)t.add(...e.slice(o,o+32)),performance.now()>=r&&(await gn(),r=performance.now()+8);return t}function vn(e){if(!ue.has(e)){let n={keySelector:t=>[t.name,t.source].filter(Boolean),threshold:at};ue.set(e,{normal:ct(e,n),words:null})}return ue.get(e)}function xn(e,n){return[e.name,e.source].filter(Boolean).some(t=>{let r=fe(t).split(" ").filter(Boolean);return n.every(o=>r.some(i=>i.startsWith(o)||o.length>=4&&ot(o,i,{useSellers:!1})>=1-1/Math.max(o.length,i.length)-1e-9))})}async function mn(e,n){let t=le(n);if(!st(t))return[];let r=vn(e),o=(await r.normal).search(t).slice(0,it);if(!/\s/u.test(t))return o;r.words??=ct(e,{keySelector:l=>[l.name,l.source,l.name.replace(/\s*\(.*/u,"")].filter(Boolean).map(fe),threshold:at});let i=fe(t),s=i.split(" ").filter(Boolean),u=(await r.words).search(i).filter(l=>xn(l,s));return[...new Set([...u,...o])].slice(0,it)}return pt(pn);})();
+
 const maxComparison = 4;
 const suggestionLimit = 8;
 const rateDenominator = 100_000;
@@ -811,12 +924,17 @@ function rateBaseline(rows, key) {
   return cases / population * rateDenominator;
 }
 
-function matchingSuggestions(rows, query) {
+function literalSuggestions(rows, query) {
   const term = query.trim().toLowerCase();
   if (!term || /[,，]/.test(term)) return [];
   return rows.filter(row => suburbMatches(row, term))
     .sort((a, b) => suggestionRelevance(a, term) - suggestionRelevance(b, term) || names.compare(a.name, b.name))
     .slice(0, suggestionLimit);
+}
+
+async function matchingSuggestions(rows, query) {
+  const literal = literalSuggestions(rows, query);
+  return literal.length ? literal : SuburbSearch.fuzzySuggestions(rows, query);
 }
 
 function renderCompareCard(container, row, {key, baseline}) {
@@ -871,10 +989,9 @@ function compareButton(container, row, comparison) {
   comparison.updateButton(button);
 }
 
-function showSuggestions(container, rows, view) {
-  const fragment = document.createDocumentFragment();
-  for (const row of matchingSuggestions(rows, view.search.value)) {
-    const item = add(fragment, "div", {className: "suggestion-row"});
+function appendSuggestions(container, rows, view) {
+  for (const row of rows) {
+    const item = add(container, "div", {className: "suggestion-row"});
     const name = add(item, "div", {className: "suggestion-name"});
     add(name, "strong", {text: row.name});
     if ((row.pop ?? 0) < Number(view.population.value)) {
@@ -890,6 +1007,67 @@ function showSuggestions(container, rows, view) {
     inspect.setAttribute("aria-label", `${inspect.textContent} · ${row.name}`);
     inspect.onclick = () => view.showArea(row);
     compareButton(actions, row, view.comparison);
+  }
+}
+
+function showSuggestions(container, rows, view) {
+  const fragment = document.createDocumentFragment();
+  const term = view.search.value.trim().toLowerCase();
+  const version = view.suggestionVersion = (view.suggestionVersion ?? 0) + 1;
+  const literal = literalSuggestions(rows, term);
+  if (!literal.length && SuburbSearch.canSearch(term)) {
+    add(fragment, "p", {text: t("正在查找相似拼写…", "Finding similar spellings…"), className: "suggestion-note"});
+    container.replaceChildren(fragment);
+    matchingSuggestions(rows, term).then(suggestions => {
+      if (view.suggestionVersion !== version) return;
+      const result = document.createDocumentFragment();
+      if (suggestions.length) {
+        add(result, "p", {text: t("没有直接匹配，可能是以下地区：", "No direct matches. Did you mean:"), className: "suggestion-note"});
+        appendSuggestions(result, suggestions, view);
+      }
+      container.replaceChildren(result);
+    }).catch(error => {
+      if (view.suggestionVersion === version) {
+        container.textContent = t("相似拼写暂时无法使用，请重试。", "Similar spellings are unavailable. Please try again.");
+      }
+      console.error("Suburb search failed", error);
+    });
+    return;
+  }
+  appendSuggestions(fragment, literal, view);
+  if (literal.length && SuburbSearch.canSearch(term) && literal.every(row => suggestionRelevance(row, term) === 3)) {
+    const button = add(fragment, "button", {text: t("查看相似拼写", "Find similar spellings"), className: "link similar-toggle"});
+    button.type = "button";
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", "similar-suggestions");
+    const status = add(fragment, "p", {className: "suggestion-note"});
+    status.setAttribute("role", "status");
+    const more = add(fragment, "div", {className: "similar-suggestions"});
+    more.id = "similar-suggestions";
+    more.hidden = true;
+    button.onclick = async () => {
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      button.setAttribute("aria-expanded", String(!expanded));
+      more.hidden = expanded;
+      if (expanded) {
+        status.textContent = "";
+        return;
+      }
+      try {
+        const seen = new Set(literal.map(row => row.code));
+        const similar = (await SuburbSearch.fuzzySuggestions(rows, term)).filter(row => !seen.has(row.code)).slice(0, 2);
+        if (view.suggestionVersion !== version || button.getAttribute("aria-expanded") !== "true") return;
+        more.replaceChildren();
+        appendSuggestions(more, similar, view);
+        status.textContent = similar.length ? t(`找到 ${similar.length} 个相似拼写`, `${similar.length} similar spellings found`) :
+          t("没有找到其他相似拼写", "No other similar spellings found");
+      } catch (error) {
+        if (view.suggestionVersion === version && button.getAttribute("aria-expanded") === "true") {
+          status.textContent = t("相似拼写暂时无法使用，请重试。", "Similar spellings are unavailable. Please try again.");
+        }
+        console.error("Suburb search failed", error);
+      }
+    };
   }
   container.replaceChildren(fragment);
 }

@@ -31,6 +31,11 @@ header{border-block:5px solid var(--ink) 1px;padding:20px 0 25px}
 .compare-tools button{padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:#edf4f4;text-align:left}
 .suggestions-list{display:grid;gap:4px;margin:8px 0}
 .suggestions-list:empty{display:none}
+.suggestion-note{margin:0;color:var(--muted);font-size:.9rem}
+.suggestion-note:empty{display:none}
+.similar-suggestions{display:grid;gap:4px}
+.similar-suggestions[hidden]{display:none}
+.similar-toggle{justify-self:start;min-height:48px}
 .suggestion-row{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:5px 8px;background:#f1f6f6;border-radius:7px}
 .suggestion-name{min-width:0;overflow-wrap:anywhere}
 .area-actions{display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap;justify-content:flex-end}
@@ -157,9 +162,9 @@ __SUBURB_MAP_CSS__
 
   <section class="explorer" id="explorer" aria-labelledby="explorer-title">
     <h2 id="explorer-title">查找和比较 suburb</h2>
-    <label class="search-label" for="search">搜索 suburb<input id="search" type="search" placeholder="Blacktown, Kingsford, Gosford" autocomplete="off" aria-controls="suggestions results"></label>
-    <div id="suggestions" class="suggestions-list" aria-label="精确选区候选"></div>
-    <p class="intro muted search-help">输入地名查看或加入对比。可用逗号搜索多个地区。</p>
+    <p id="search-help" class="intro muted search-help">输入地名查看或加入对比。可用逗号搜索多个地区。</p>
+    <label class="search-label" for="search">搜索 suburb<input id="search" type="search" placeholder="Blacktown, Kingsford, Gosford" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-controls="suggestions results" aria-describedby="search-help"></label>
+    <div id="suggestions" class="suggestions-list"></div>
     <div class="core-controls">
       <label for="metric">犯罪指标<select id="metric"><option value="non_dv">非家暴袭击</option><option value="burglary">住宅入室盗窃</option><option value="assault">袭击合计</option><option value="violent">暴力犯罪</option></select></label>
       <div class="view-switch" aria-label="查看方式">
@@ -268,6 +273,7 @@ __SUBURB_LANGUAGE_SCRIPT__
 __SUBURB_MAP_SCRIPT__
 __SUBURB_GESTURES_SCRIPT__
 __SUBURB_KEYBOARD_SCRIPT__
+__SUBURB_SEARCH_SCRIPT__
 __SUBURB_COMPARE_SCRIPT__
 __SUBURB_DETAILS_SCRIPT__
 __SUBURB_SCRIPT__

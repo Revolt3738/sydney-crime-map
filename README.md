@@ -93,11 +93,12 @@ Please follow the source agencies' attribution and reuse terms when using or red
 
 ## Getting started
 
-The site uses HTML, CSS and vanilla JavaScript. The build and validation scripts use Node.js and Python standard libraries, so no npm install is needed for local development. The project was checked with Node.js 26 and Python 3. Deployment and scheduler tooling have separate pinned dependencies.
+The site uses HTML, CSS and vanilla JavaScript. The build bundles the pinned search library with npm dependencies. The project was checked with Node.js 26 and Python 3. Deployment and scheduler tooling have separate pinned dependencies.
 
 ```bash
 git clone https://github.com/Revolt3738/sydney-crime-map.git
 cd sydney-crime-map
+npm ci
 
 # Run the tests, build the site and validate the bilingual pages
 python work/check_site.py

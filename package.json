@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "cf": "1.0.0-beta.32"
+    "cf": "1.0.0-beta.32",
+    "esbuild": "0.28.2"
+  },
+  "dependencies": {
+    "fast-fuzzy": "1.12.0"
   }
 }

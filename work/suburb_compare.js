@@ -31,12 +31,17 @@ function rateBaseline(rows, key) {
   return cases / population * rateDenominator;
 }
 
-function matchingSuggestions(rows, query) {
+function literalSuggestions(rows, query) {
   const term = query.trim().toLowerCase();
   if (!term || /[,，]/.test(term)) return [];
   return rows.filter(row => suburbMatches(row, term))
     .sort((a, b) => suggestionRelevance(a, term) - suggestionRelevance(b, term) || names.compare(a.name, b.name))
     .slice(0, suggestionLimit);
+}
+
+async function matchingSuggestions(rows, query) {
+  const literal = literalSuggestions(rows, query);
+  return literal.length ? literal : SuburbSearch.fuzzySuggestions(rows, query);
 }
 
 function renderCompareCard(container, row, {key, baseline}) {
@@ -91,10 +96,9 @@ function compareButton(container, row, comparison) {
   comparison.updateButton(button);
 }
 
-function showSuggestions(container, rows, view) {
-  const fragment = document.createDocumentFragment();
-  for (const row of matchingSuggestions(rows, view.search.value)) {
-    const item = add(fragment, "div", {className: "suggestion-row"});
+function appendSuggestions(container, rows, view) {
+  for (const row of rows) {
+    const item = add(container, "div", {className: "suggestion-row"});
     const name = add(item, "div", {className: "suggestion-name"});
     add(name, "strong", {text: row.name});
     if ((row.pop ?? 0) < Number(view.population.value)) {
@@ -110,6 +114,67 @@ function showSuggestions(container, rows, view) {
     inspect.setAttribute("aria-label", `${inspect.textContent} · ${row.name}`);
     inspect.onclick = () => view.showArea(row);
     compareButton(actions, row, view.comparison);
+  }
+}
+
+function showSuggestions(container, rows, view) {
+  const fragment = document.createDocumentFragment();
+  const term = view.search.value.trim().toLowerCase();
+  const version = view.suggestionVersion = (view.suggestionVersion ?? 0) + 1;
+  const literal = literalSuggestions(rows, term);
+  if (!literal.length && SuburbSearch.canSearch(term)) {
+    add(fragment, "p", {text: t("正在查找相似拼写…", "Finding similar spellings…"), className: "suggestion-note"});
+    container.replaceChildren(fragment);
+    matchingSuggestions(rows, term).then(suggestions => {
+      if (view.suggestionVersion !== version) return;
+      const result = document.createDocumentFragment();
+      if (suggestions.length) {
+        add(result, "p", {text: t("没有直接匹配，可能是以下地区：", "No direct matches. Did you mean:"), className: "suggestion-note"});
+        appendSuggestions(result, suggestions, view);
+      }
+      container.replaceChildren(result);
+    }).catch(error => {
+      if (view.suggestionVersion === version) {
+        container.textContent = t("相似拼写暂时无法使用，请重试。", "Similar spellings are unavailable. Please try again.");
+      }
+      console.error("Suburb search failed", error);
+    });
+    return;
+  }
+  appendSuggestions(fragment, literal, view);
+  if (literal.length && SuburbSearch.canSearch(term) && literal.every(row => suggestionRelevance(row, term) === 3)) {
+    const button = add(fragment, "button", {text: t("查看相似拼写", "Find similar spellings"), className: "link similar-toggle"});
+    button.type = "button";
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", "similar-suggestions");
+    const status = add(fragment, "p", {className: "suggestion-note"});
+    status.setAttribute("role", "status");
+    const more = add(fragment, "div", {className: "similar-suggestions"});
+    more.id = "similar-suggestions";
+    more.hidden = true;
+    button.onclick = async () => {
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      button.setAttribute("aria-expanded", String(!expanded));
+      more.hidden = expanded;
+      if (expanded) {
+        status.textContent = "";
+        return;
+      }
+      try {
+        const seen = new Set(literal.map(row => row.code));
+        const similar = (await SuburbSearch.fuzzySuggestions(rows, term)).filter(row => !seen.has(row.code)).slice(0, 2);
+        if (view.suggestionVersion !== version || button.getAttribute("aria-expanded") !== "true") return;
+        more.replaceChildren();
+        appendSuggestions(more, similar, view);
+        status.textContent = similar.length ? t(`找到 ${similar.length} 个相似拼写`, `${similar.length} similar spellings found`) :
+          t("没有找到其他相似拼写", "No other similar spellings found");
+      } catch (error) {
+        if (view.suggestionVersion === version && button.getAttribute("aria-expanded") === "true") {
+          status.textContent = t("相似拼写暂时无法使用，请重试。", "Similar spellings are unavailable. Please try again.");
+        }
+        console.error("Suburb search failed", error);
+      }
+    };
   }
   container.replaceChildren(fragment);
 }

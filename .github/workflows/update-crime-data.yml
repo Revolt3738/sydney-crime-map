@@ -23,6 +23,8 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "26.13.1"
+      - name: Install site dependencies
+        run: npm ci
       - name: Verify the update and site builds
         run: python work/check_site.py
   update:
@@ -48,6 +50,8 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "26.13.1"
+      - name: Install site dependencies
+        run: npm ci
       - name: Download and update BOCSAR data
         run: python work/update_crime_data.py
       - name: Validate data and build the site
