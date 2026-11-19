@@ -11,7 +11,7 @@ function toPlace(row) {
 }
 
 export function selectPlaces(rows) {
-  const sorted = [...rows].sort((a, b) => (b.pop ?? 0) - (a.pop ?? 0) || a.name.localeCompare(b.name, "en"));
+  const sorted = rows.toSorted((a, b) => (b.pop ?? 0) - (a.pop ?? 0) || a.name.localeCompare(b.name, "en"));
   const leaders = sorted.slice(0, LEADER_COUNT).map(toPlace);
   const sources = new Set(leaders.map(place => place.source));
   const extras = EXISTING_PLACES.filter(source => !sources.has(source)).map(source => {

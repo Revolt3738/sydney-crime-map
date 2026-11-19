@@ -13,7 +13,8 @@
 <link rel="icon" type="image/png" href="data:image/png;base64,__SUBURB_FAVICON_PNG__">
 <style>
 :root{--paper:#edf3f4;--white:#fff;--ink:#142e3c;--muted:#48616c;--line:#cbdadd;--teal:#006459;--teal-soft:#e1f1ed;--amber:#7b4a17;font:16px/1.6 "Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--paper)}
-*{box-sizing:border-box}
+html{box-sizing:border-box}
+body,main,header,section,footer,div,span,p,h1,h2,h3,ol,li,article,dl,dt,dd,small,strong,a,button,input,select,table,thead,tbody,tr,th,td,details,summary,svg{box-sizing:inherit}
 body{margin:0}
 main{width:min(1440px,100%);margin:auto;padding:clamp(16px,4vw,56px)}
 h1,h2,h3,p{margin:0}
@@ -71,8 +72,13 @@ button.link{background:none;border:0;padding:0;text-decoration:underline;text-un
 .core-controls .view-switch{margin:0}
 .controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end;margin:7px 0}
 label{display:flex;flex-direction:column;gap:3px;font-size:.82rem;font-weight:700}
-input,select,.secondary{min-height:43px;border:1px solid #95abb0;border-radius:7px;background:var(--white);padding:6px 10px;width:100%;min-width:0;font-size:.9rem}
+input,select,.secondary{box-sizing:border-box;min-height:48px;border:1px solid #95abb0;border-radius:7px;background:var(--white);padding:6px 10px;width:100%;min-width:0;font-size:1rem}
 .secondary{font-weight:700;width:auto}
+@media (pointer:coarse){
+  button,button.secondary,input,select{min-width:48px;min-height:48px}
+  .language-switch [data-language],.stop a,.suburb-pages li a{display:inline-flex;align-items:center;min-width:44px;min-height:44px}
+  details summary{min-height:44px}
+}
 .status{display:flex;flex-wrap:wrap;gap:4px 15px;justify-content:space-between;margin-bottom:9px;font-size:.86rem}
 table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;font-size:.87rem}
 th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
@@ -125,7 +131,7 @@ dd{font-variant-numeric:tabular-nums;font-weight:700}
   .search-label{margin-top:5px}
   .search-help{font-size:.75rem}
   .core-controls{gap:5px 9px}
-  .core-controls label{flex-basis:125px}
+  .core-controls label{flex-basis:100%;max-width:none}
   .core-controls .view-switch{gap:4px}
   .core-controls .view-switch button{padding-inline:7px;font-size:.8rem}
   .result-note,.status{font-size:.76rem;margin-bottom:5px}
@@ -151,20 +157,20 @@ __SUBURB_MAP_CSS__
 
   <section class="explorer" id="explorer" aria-labelledby="explorer-title">
     <h2 id="explorer-title">查找和比较 suburb</h2>
-    <label class="search-label">搜索 suburb<input id="search" type="search" placeholder="Blacktown, Kingsford, Gosford" autocomplete="off" aria-controls="suggestions results"></label>
+    <label class="search-label" for="search">搜索 suburb<input id="search" type="search" placeholder="Blacktown, Kingsford, Gosford" autocomplete="off" aria-controls="suggestions results"></label>
     <div id="suggestions" class="suggestions-list" aria-label="精确选区候选"></div>
     <p class="intro muted search-help">输入地名查看或加入对比。可用逗号搜索多个地区。</p>
     <div class="core-controls">
-      <label>犯罪指标<select id="metric"><option value="non_dv">非家暴袭击</option><option value="burglary">住宅入室盗窃</option><option value="assault">袭击合计</option><option value="violent">暴力犯罪</option></select></label>
+      <label for="metric">犯罪指标<select id="metric"><option value="non_dv">非家暴袭击</option><option value="burglary">住宅入室盗窃</option><option value="assault">袭击合计</option><option value="violent">暴力犯罪</option></select></label>
       <div class="view-switch" aria-label="查看方式">
         <button type="button" class="secondary" data-view="list" aria-controls="list-view" aria-pressed="true">排名列表</button>
         <button type="button" class="secondary" data-view="map" aria-controls="map-view" aria-pressed="false">Suburb 地图</button>
       </div>
     </div>
     <div class="controls">
-        <label>统计区域<select id="region"><option value="">全部区域</option></select></label>
-        <label>最低普查人口<select id="population"><option value="0">显示全部</option><option value="500">至少 500 人</option><option value="1000">至少 1,000 人</option><option value="2000" selected>至少 2,000 人</option><option value="5000">至少 5,000 人</option></select></label>
-        <label>排序方式<select id="order"><option value="rateHigh">案件率从高到低</option><option value="rateLow">案件率从低到高</option><option value="countHigh">案件数从高到低</option><option value="name">Suburb 名称 A–Z</option></select></label>
+        <label for="region">统计区域<select id="region"><option value="">全部区域</option></select></label>
+        <label for="population">最低普查人口<select id="population"><option value="0">显示全部</option><option value="500">至少 500 人</option><option value="1000">至少 1,000 人</option><option value="2000" selected>至少 2,000 人</option><option value="5000">至少 5,000 人</option></select></label>
+        <label for="order">排序方式<select id="order"><option value="rateHigh">案件率从高到低</option><option value="rateLow">案件率从低到高</option><option value="countHigh">案件数从高到低</option><option value="name">Suburb 名称 A–Z</option></select></label>
         <button class="secondary" id="reset" type="button">重置</button>
     </div>
     <details class="compare-panel" id="compare-panel" hidden>
@@ -182,23 +188,31 @@ __SUBURB_MAP_CSS__
       <tbody id="results" role="rowgroup"></tbody>
     </table>
     <button type="button" class="secondary" id="load-more" hidden>显示更多地区</button>
+    <span id="load-more-status" role="status" class="cell-note"></span>
     </div>
     <div id="map-view" hidden>
+      <p id="map-status" role="status"></p>
+      <div id="map-content" hidden>
       <div class="map-toolbar">
         <button type="button" class="secondary" id="map-fit">定位筛选结果</button>
         <button type="button" class="secondary" id="map-reset">显示全图</button>
         <button type="button" class="secondary" id="map-in" aria-label="放大">＋</button>
         <button type="button" class="secondary" id="map-out" aria-label="缩小">−</button>
+        <button type="button" class="secondary" id="map-up" aria-label="向上平移地图">↑</button>
+        <button type="button" class="secondary" id="map-down" aria-label="向下平移地图">↓</button>
+        <button type="button" class="secondary" id="map-left" aria-label="向左平移地图">←</button>
+        <button type="button" class="secondary" id="map-right" aria-label="向右平移地图">→</button>
       </div>
       <div class="map-legend" id="map-legend" aria-label="案件率图例"></div>
-      <p class="map-gestures">电脑用滚轮缩放，拖动平移。手机用双指捏合缩放、单指拖动。在地图外滑动可滚动页面。</p>
+      <p class="map-gestures" id="map-instructions">点击地图后可用滚轮缩放、拖动平移。键盘用户可用方向键选择地区，用平移按钮移动地图。手机用双指捏合缩放、单指拖动。</p>
       <div class="map-summary"><p id="map-summary" tabindex="-1" aria-live="polite">点击地图或在搜索候选中定位地区。</p><div id="map-summary-actions"></div></div>
-      <svg id="map-svg" role="group" aria-label="大悉尼及中央海岸的 Suburb 犯罪率分布图">
+      <svg id="map-svg" role="listbox" tabindex="-1" aria-label="大悉尼及中央海岸的 Suburb 犯罪率分布图" aria-describedby="map-instructions">
         <defs><pattern id="small-area" width=".8" height=".8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width=".8" height=".8" fill="#e7eaed"></rect><path d="M0 0V.8" stroke="#9eabb2" stroke-width=".18"></path></pattern></defs>
         <g id="map-areas"></g>
         <g id="map-landmarks" aria-hidden="true"></g>
       </svg>
-      <p class="intro muted">正案件率按第 20、40、60、80、95 百分位分成六档，最深色标出最高约 5%。零案件、无案件率和低人口筛除各有单独标记。同一指标的分界不随筛选改变。边界来自 <a href="https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SAL/MapServer/0">ABS 2021 SAL 官方接口</a>（CC BY 4.0），经显示简化。</p>
+      <p class="intro muted">正案件率按第 20、40、60、80、95 百分位分成六档，色带按显示的一位小数划分，最深色标出最高约 5%。零案件、无案件率和低人口筛除各有单独标记。同一指标的分界不随筛选改变。边界来自 <a href="https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SAL/MapServer/0">ABS 2021 SAL 官方接口</a>（CC BY 4.0），经显示简化。</p>
+      </div>
     </div>
     <noscript><p>请在浏览器中启用 JavaScript 后重新打开这个 HTML，以查看完整名单。</p></noscript>
   </section>
@@ -253,6 +267,7 @@ const chineseDataLabels = __SUBURB_ZH_LABELS__;
 __SUBURB_LANGUAGE_SCRIPT__
 __SUBURB_MAP_SCRIPT__
 __SUBURB_GESTURES_SCRIPT__
+__SUBURB_KEYBOARD_SCRIPT__
 __SUBURB_COMPARE_SCRIPT__
 __SUBURB_DETAILS_SCRIPT__
 __SUBURB_SCRIPT__

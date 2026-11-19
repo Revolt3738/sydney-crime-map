@@ -7,18 +7,18 @@ function detailSummary(row) {
 }
 
 function fillAreaDetail(container, row, view) {
-  const title = add(container, "h3", `${row.name} · ${t("犯罪明细", "Offence details")}`);
+  const title = add(container, "h3", {text: `${row.name} · ${t("犯罪明细", "Offence details")}`});
   title.tabIndex = -1;
-  add(container, "p", detailSummary(row), "muted detail-meta");
+  add(container, "p", {text: detailSummary(row), className: "muted detail-meta"});
   compareButton(container, row, view.comparison);
-  const list = add(container, "dl", undefined, "detail-list");
+  const list = add(container, "dl", {className: "detail-list"});
   for (const offence of Object.keys(view.labels)) {
     const item = add(list, "div");
-    add(item, "dt", offenceLabel(offence));
-    add(item, "dd", formatted(row.counts[offence]));
+    add(item, "dt", {text: offenceLabel(offence)});
+    add(item, "dd", {text: formatted(row.counts[offence])});
   }
-  add(container, "p", t("* 谋杀和误杀按受害者人数统计，其余类别按警方记录的事件数统计。",
-    "* Murder and manslaughter are counted by victim. Other categories count police-recorded incidents."), "cell-note");
+  add(container, "p", {text: t("* 谋杀和误杀按受害者人数统计，其余类别按警方记录的事件数统计。",
+    "* Murder and manslaughter are counted by victim. Other categories count police-recorded incidents."), className: "cell-note"});
   return title;
 }
 
@@ -27,7 +27,7 @@ function buildDetail(row, view) {
   detail.className = "detail-row";
   detail.id = `detail-${row.code}`;
   detail.setAttribute("role", "row");
-  const cell = add(detail, "td", undefined, "detail-content");
+  const cell = add(detail, "td", {className: "detail-content"});
   cell.colSpan = tableColumns;
   cell.setAttribute("role", "cell");
   fillAreaDetail(cell, row, view);
@@ -52,7 +52,7 @@ function renderLookup(view) {
   container.replaceChildren();
   container.hidden = !view.lookup;
   if (!view.lookup) return;
-  const close = add(container, "button", t("收起详情", "Close details"), "secondary");
+  const close = add(container, "button", {text: t("收起详情", "Close details"), className: "secondary"});
   close.type = "button";
   close.onclick = () => {
     view.lookup = undefined;

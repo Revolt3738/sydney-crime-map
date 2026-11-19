@@ -1,5 +1,6 @@
 :root{font:16px/1.65 "Segoe UI","Microsoft YaHei",sans-serif;color:#142e3c;background:#edf3f4}
-*{box-sizing:border-box}
+html{box-sizing:border-box}
+body,main,nav,header,section,footer,div,span,p,h1,h2,h3,ol,li,a,table,thead,tbody,tr,th,td,dl,dt,dd{box-sizing:inherit}
 body{margin:0}
 main{max-width:1080px;margin:auto;padding:clamp(16px,4vw,50px)}
 a{color:#006459;text-underline-offset:.2em}
@@ -13,6 +14,7 @@ p{margin:8px 0}
 section{background:#fff;border:1px solid #cbdadd;border-radius:14px;padding:clamp(14px,3vw,24px);margin:18px 0}
 footer{color:#48616c;font-size:.9rem;margin:24px 0}
 .action{display:inline-block;margin-top:8px;font-weight:700}
+@media(pointer:coarse){nav a,.action{display:inline-flex;align-items:center;min-width:44px;min-height:44px}}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.9rem}
 th,td{text-align:left;padding:9px;border-bottom:1px solid #cbdadd;vertical-align:top}
 thead th{background:#e7eff0}

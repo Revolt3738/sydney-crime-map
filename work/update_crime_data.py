@@ -7,6 +7,7 @@ from pathlib import Path
 
 from automation.source import read_archive
 from automation.statistics import update_snapshot
+from automation.transaction import commit_transaction, recover_transaction, update_lock
 
 WORK = Path(__file__).resolve().parent
 SOURCE_URL = "https://bocsarblob.blob.core.windows.net/bocsar-open-data/SuburbData.zip"
@@ -26,6 +27,12 @@ def download_archive(path):
 
 
 def update(path, dry_run):
+    with update_lock(WORK):
+        update_locked(path, dry_run)
+
+
+def update_locked(path, dry_run):
+    recover_transaction(WORK, dry_run)
     snapshot_path = WORK / "crime_data.json"
     period_path = WORK / "crime_period.json"
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
@@ -37,8 +44,7 @@ def update(path, dry_run):
     changed = updated != snapshot or source["period"] != previous_period
     print(f"BOCSAR period: {source['period']['start']} to {source['period']['end']}; changed: {changed}")
     if changed and not dry_run:
-        snapshot_path.write_text(json.dumps(updated, ensure_ascii=False), encoding="utf-8")
-        period_path.write_text(json.dumps(source["period"], indent=2) + "\n", encoding="utf-8")
+        commit_transaction(WORK, updated, source["period"])
 
 
 def main():

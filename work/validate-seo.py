@@ -5,13 +5,13 @@ from xml.etree import ElementTree
 from calendar import month_name
 import json
 import re
+from automation.transaction import read_snapshot
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "outputs" / "sydney-crime-seo"
 ORIGIN = "https://sydcrime.xdxo.top"
-DATA = json.loads((ROOT / "work" / "crime_data.json").read_text(encoding="utf-8"))
+DATA, PERIOD = read_snapshot(ROOT / "work")
 LABELS = json.loads((ROOT / "work" / "suburb_chinese_labels.json").read_text(encoding="utf-8"))
-PERIOD = json.loads((ROOT / "work" / "crime_period.json").read_text(encoding="utf-8"))
 LEADERS = (
     ("blacktown", "Blacktown", 50961), ("castle-hill", "Castle Hill", 40874),
     ("auburn", "Auburn", 39333), ("baulkham-hills", "Baulkham Hills", 37415),
@@ -193,8 +193,10 @@ def main():
     assert len(urls) == len(set(urls)) == 2 + 2 * len(PLACES)
     assert ORIGIN + "/en/" not in urls
     expected_files = {urlsplit(url).path.lstrip("/") + "index.html" for url in urls}
-    expected_files.update(("sitemap.xml", "en/index.html"))
+    expected_files.update(("sitemap.xml", "en/index.html", "map-shapes.json"))
     assert {path.relative_to(SITE).as_posix() for path in SITE.rglob("*") if path.is_file()} == expected_files
+    assert json.loads((SITE / "map-shapes.json").read_text(encoding="utf-8")) == json.loads(
+        (ROOT / "work" / "suburb_shapes.json").read_text(encoding="utf-8"))
     for url in urls:
         assert url.startswith(ORIGIN + "/")
         assert (SITE / urlsplit(url).path.lstrip("/") / "index.html").is_file()
@@ -202,6 +204,7 @@ def main():
     assert document("en/index.html").canonical == [ORIGIN + "/"]
     assert '<meta http-equiv="refresh" content="0; url=../">' in legacy
     for relative, expected in (("index.html", "en-AU"), ("zh/index.html", "zh-Hans")):
+        assert 'id="map-shapes" data-src="/map-shapes.json"' in (SITE / relative).read_text(encoding="utf-8")
         doc = document(relative)
         assert doc.lang == expected and len(doc.headings) == 1
         assert doc.population_entries == [f"{name} {population:,}" for _, name, population in LEADERS]

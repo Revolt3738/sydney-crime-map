@@ -12,6 +12,7 @@
 #map-svg{width:100%;height:clamp(360px,60vh,650px);display:block;border:1px solid #abc2cd;border-radius:8px;background:#c3dfe9;touch-action:none}
 #map-svg path[data-code]{stroke:#514c50;stroke-width:.55;vector-effect:non-scaling-stroke;fill-rule:evenodd;cursor:pointer}
 #map-svg path[data-code]:hover,#map-svg path[data-code]:focus,#map-svg path.selected{stroke:#141e35;stroke-width:2;outline:none}
+#map-svg path[data-code]:focus-visible{stroke:#000;stroke-width:4;outline:2px solid #000;outline-offset:2px}
 #map-svg path.outside-filter{opacity:.27}
 #map-svg path.selected{opacity:1}
 #map-landmarks{pointer-events:none;text-anchor:middle;dominant-baseline:central}

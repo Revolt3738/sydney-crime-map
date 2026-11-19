@@ -13,8 +13,8 @@ BREAK_IN = "Break and enter dwelling"
 
 
 def run_update(workspace, archive, *options):
-    command = [sys.executable, "work/update_crime_data.py", "--archive", str(archive), *options]
-    return subprocess.run(command, cwd=workspace, text=True, capture_output=True,
+    command = [sys.executable, "-X", "utf8", "work/update_crime_data.py", "--archive", str(archive), *options]
+    return subprocess.run(command, cwd=workspace, text=True, encoding="utf-8", capture_output=True,
                           timeout=TEST_TIMEOUT_SECONDS)
 
 

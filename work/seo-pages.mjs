@@ -66,7 +66,7 @@ function overview(data, row, lang) {
   return `<section><h2>${text.overview}</h2><div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div><p>${escapeHtml(text.note)}</p></section>`;
 }
 
-function offenceDetails(data, row, lang, labels) {
+function offenceDetails(data, row, {lang, labels}) {
   const items = Object.keys(data.labels).map(offence => {
     assert.ok(Object.hasOwn(row.counts, offence));
     const label = lang === "en" ? offence : labels.offences[offence];
@@ -90,6 +90,6 @@ export function suburbPage({data, labels, place, lang, css, favicon, period}) {
   const region = lang === "en" ? row.region : labels.regions[row.region];
   const home = lang === "en" ? "/" : "/zh/";
   const homeSearch = `${home}?q=${encodeURIComponent(place.source)}`;
-  const body = `${navigation(place, lang)}<header><p class="kicker">${escapeHtml(region)}</p><h1>${escapeHtml(row.source)} · ${text.title}</h1><p>${escapeHtml(periodLabel)}</p><p>${text.population}：<strong>${integer(row.pop)}</strong></p><p><a class="action" href="${homeSearch}">${text.compare} →</a></p></header>${overview(data, row, lang)}${offenceDetails(data, row, lang, labels)}<footer><h2>${text.sources}</h2><p>${text.methods}</p><p><a href="https://bocsar.nsw.gov.au/statistics-dashboards/open-datasets/criminal-offences-data.html">${text.bocsar}</a> · <a href="https://www.abs.gov.au/census/find-census-data/datapacks">${text.abs}</a></p></footer>`;
+  const body = `${navigation(place, lang)}<header><p class="kicker">${escapeHtml(region)}</p><h1>${escapeHtml(row.source)} · ${text.title}</h1><p>${escapeHtml(periodLabel)}</p><p>${text.population}：<strong>${integer(row.pop)}</strong></p><p><a class="action" href="${homeSearch}">${text.compare} →</a></p></header>${overview(data, row, lang)}${offenceDetails(data, row, {lang, labels})}<footer><h2>${text.sources}</h2><p>${text.methods}</p><p><a href="https://bocsar.nsw.gov.au/statistics-dashboards/open-datasets/criminal-offences-data.html">${text.bocsar}</a> · <a href="https://www.abs.gov.au/census/find-census-data/datapacks">${text.abs}</a></p></footer>`;
   return `<!doctype html><html lang="${lang === "en" ? "en-AU" : "zh-Hans"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${meta(row, place, {lang, dates})}<link rel="icon" type="image/png" href="data:image/png;base64,${favicon}"><style>${css}</style></head><body><main>${body}</main></body></html>`;
 }

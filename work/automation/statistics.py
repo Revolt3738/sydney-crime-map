@@ -36,13 +36,13 @@ def source_matches(rows, counts):
     return matches
 
 
-def update_row(row, source, offences, labels):
-    counts = offences[source] if source else {}
-    if source and set(counts) != set(labels):
-        raise ValueError(f"Missing or unexpected offences for {source!r}")
-    metrics = {key: sum(counts[offence] for offence in group) if source else None
+def update_row(row, source_name, source):
+    counts = source["counts"][source_name] if source_name else {}
+    if source_name and set(counts) != set(source["labels"]):
+        raise ValueError(f"Missing or unexpected offences for {source_name!r}")
+    metrics = {key: sum(counts[offence] for offence in group) if source_name else None
                for key, group in FOCUS.items()}
-    return {**row, "source": source, "metrics": metrics, "counts": counts}
+    return {**row, "source": source_name, "metrics": metrics, "counts": counts}
 
 
 def rank_metric(rows, metric):
@@ -60,7 +60,7 @@ def update_snapshot(snapshot, source):
     if snapshot["labels"] != source["labels"]:
         raise ValueError("BOCSAR offence categories changed; update mappings and translations")
     matches = source_matches(snapshot["rows"], source["counts"])
-    rows = [update_row(row, matches[row["code"]], source["counts"], source["labels"])
+    rows = [update_row(row, matches[row["code"]], source)
             for row in snapshot["rows"]]
     for metric in FOCUS:
         rows = rank_metric(rows, metric)

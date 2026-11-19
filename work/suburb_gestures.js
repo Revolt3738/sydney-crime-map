@@ -8,7 +8,7 @@ function gestureFrame(points) {
   };
 }
 
-function gestureExtent(box, previous, current, anchor, scale) {
+function gestureExtent({box, previous, current, anchor, scale}) {
   const factor = previous.span && current.span ? current.span / previous.span : 1;
   const [x, y, width, height] = zoomAt(box, factor, anchor);
   const nextScale = scale * factor;
@@ -26,6 +26,7 @@ function configureMapGestures(map, update, select) {
   svg.addEventListener("pointerdown", event => {
     if (event.button !== 0 || points.size >= 2) return;
     if (!points.size) {
+      svg.focus({preventScroll: true});
       moved = false;
       candidate = event.target.closest("path[data-code]")?.dataset.code;
     }
@@ -43,7 +44,7 @@ function configureMapGestures(map, update, select) {
     moved = true;
     const point = new DOMPoint(previous.x, previous.y).matrixTransform(svg.getScreenCTM().inverse());
     const scale = extentScale(map.box, svg.clientWidth, svg.clientHeight);
-    update(gestureExtent(map.box, previous, current, [point.x, point.y], scale));
+    update(gestureExtent({box: map.box, previous, current, anchor: [point.x, point.y], scale}));
     previous = current;
   });
 

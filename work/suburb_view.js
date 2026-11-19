@@ -18,7 +18,7 @@ function formatted(value, formatter = integers) {
   return value == null ? absent : formatter.format(value);
 }
 
-function filterRows(rows, query, region, minPopulation = 0) {
+function filterRows(rows, query, {region = "", minPopulation = 0} = {}) {
   const terms = query.toLowerCase().split(/[,，]/).map(term => term.trim()).filter(Boolean);
   return rows.filter(row =>
     ((row.pop ?? 0) >= minPopulation || terms.some(term => exactSuburb(row, term))) &&
@@ -36,13 +36,13 @@ function compareOptional(first, second, sign) {
 function sortedRows(rows, metric, order) {
   const index = order === "countHigh" ? 0 : 1;
   const direction = order === "rateLow" ? 1 : -1;
-  return rows.slice().sort((a, b) => {
+  return rows.toSorted((a, b) => {
     const byMetric = order === "name" ? 0 : compareOptional(a[metric][index], b[metric][index], direction);
     return byMetric || names.compare(a.name, b.name);
   });
 }
 
-function add(parent, tag, text, className) {
+function add(parent, tag, {text, className} = {}) {
   const node = document.createElement(tag);
   if (text !== undefined) node.textContent = text;
   if (className) node.className = className;
@@ -58,42 +58,42 @@ function rateUnit() {
   return t("件 / 10 万居民", "incidents per 100,000 residents");
 }
 
-function addMetric(tr, row, key, activeMetric) {
+function addMetric(tr, row, {key, activeMetric}) {
   const [count, rate, rank] = row[key];
-  const cell = add(tr, "td", undefined, key === activeMetric ? "active" : undefined);
+  const cell = add(tr, "td", {className: key === activeMetric ? "active" : undefined});
   cell.setAttribute("role", "cell");
-  add(cell, "span", t(...metrics[key]), "metric-label").setAttribute("aria-hidden", "true");
-  add(cell, "span", formatted(rate, decimals), "metric");
-  if (rate != null) add(cell, "span", rateUnit(), "mobile-unit");
+  add(cell, "span", {text: t(...metrics[key]), className: "metric-label"}).setAttribute("aria-hidden", "true");
+  add(cell, "span", {text: formatted(rate, decimals), className: "metric"});
+  if (rate != null) add(cell, "span", {text: rateUnit(), className: "mobile-unit"});
   const countLabel = count == null ? t("无匹配记录", "No matched records") :
     t(`${formatted(count)} 件`, `${formatted(count)} ${count === 1 ? "incident" : "incidents"}`);
   const rankLabel = rank == null ? t("未排名", "Unranked") : rateRank(rank);
-  add(cell, "span", `${countLabel} · ${rankLabel}`, "cell-note");
+  add(cell, "span", {text: `${countLabel} · ${rankLabel}`, className: "cell-note"});
 }
 
 function addRow(fragment, row, view) {
   const tr = add(fragment, "tr");
   tr.setAttribute("role", "row");
-  const place = add(tr, "td", undefined, "place");
+  const place = add(tr, "td", {className: "place"});
   place.setAttribute("role", "cell");
-  const button = add(place, "button", row.name, "link suburb");
+  const button = add(place, "button", {text: row.name, className: "link suburb"});
   button.type = "button";
   button.dataset.suburb = row.code;
   button.setAttribute("aria-expanded", "false");
-  add(place, "span", regionLabel(row.region), "area");
+  add(place, "span", {text: regionLabel(row.region), className: "area"});
   compareButton(place, row, view.comparison);
-  const pop = add(tr, "td", undefined, "population");
+  const pop = add(tr, "td", {className: "population"});
   pop.setAttribute("role", "cell");
-  add(pop, "span", t("普查人口", "Census population"), "metric-label").setAttribute("aria-hidden", "true");
-  add(pop, "span", formatted(row.pop), "metric");
-  if (row.pop > 0 && row.pop < smallPopulation) add(pop, "span", t("小人口", "Small population"), "cell-note small-pop");
-  if (row.pop === 0) add(pop, "span", t("无正人口分母", "Zero Census population"), "cell-note");
-  for (const key of Object.keys(metrics)) addMetric(tr, row, key, view.metric.value);
+  add(pop, "span", {text: t("普查人口", "Census population"), className: "metric-label"}).setAttribute("aria-hidden", "true");
+  add(pop, "span", {text: formatted(row.pop), className: "metric"});
+  if (row.pop > 0 && row.pop < smallPopulation) add(pop, "span", {text: t("小人口", "Small population"), className: "cell-note small-pop"});
+  if (row.pop === 0) add(pop, "span", {text: t("无正人口分母", "Zero Census population"), className: "cell-note"});
+  for (const key of Object.keys(metrics)) addMetric(tr, row, {key, activeMetric: view.metric.value});
 }
 
 function addEmpty(fragment) {
-  const message = add(add(fragment, "tr"), "td", t("未找到匹配的 suburb。请检查拼写或切换至全部区域。",
-    "No matching suburbs. Check the spelling or select All areas."), "empty");
+  const message = add(add(fragment, "tr"), "td", {text: t("未找到匹配的 suburb。请检查拼写或切换至全部区域。",
+    "No matching suburbs. Check the spelling or select All areas."), className: "empty"});
   message.colSpan = tableColumns;
 }
 
@@ -101,16 +101,25 @@ function renderResults(filtered, view) {
   const ordered = sortedRows(filtered, view.metric.value, view.order.value);
   const more = view["load-more"];
   let visible = 0;
-  const appendBatch = () => {
+  const appendBatch = (moveFocus = false) => {
     const fragment = document.createDocumentFragment();
-    for (const row of ordered.slice(visible, visible + rowsPerBatch)) addRow(fragment, row, view);
+    const batch = ordered.slice(visible, visible + rowsPerBatch);
+    for (const row of batch) addRow(fragment, row, view);
     if (!ordered.length) addEmpty(fragment);
+    const firstButton = fragment.querySelector("button.suburb");
     view.results.append(fragment);
     visible += rowsPerBatch;
     more.hidden = visible >= ordered.length;
+    if (moveFocus && firstButton) {
+      firstButton.focus();
+      const loaded = Math.min(visible, ordered.length);
+      view["load-more-status"].textContent = t(`已显示 ${loaded} / ${ordered.length} 个地区`,
+        `Showing ${loaded} of ${ordered.length} suburbs`);
+    }
   };
   view.results.replaceChildren();
-  more.onclick = appendBatch;
+  view["load-more-status"].textContent = "";
+  more.onclick = () => appendBatch(true);
   appendBatch();
   for (const th of document.querySelectorAll("[data-column]")) {
     th.classList.toggle("active", th.dataset.column === view.metric.value);
@@ -120,7 +129,7 @@ function renderResults(filtered, view) {
 function configureRegion(rows, select) {
   const regions = new Set(rows.map(row => row.region));
   for (const region of Array.from(regions).sort(names.compare)) {
-    add(select, "option", regionLabel(region)).value = region;
+    add(select, "option", {text: regionLabel(region)}).value = region;
   }
 }
 
@@ -157,18 +166,32 @@ function updateRegionLabels(view) {
   }
 }
 
+function startMapLoading(rows, view, params) {
+  if (view.mapPromise) return;
+  view["map-status"].textContent = t("正在加载地图…", "Loading map…");
+  view.mapPromise = loadMapShapes(rows).then(shapes => {
+    view.map = initCrimeMap({rows, snapshot: mapSnapshot(params, rows), view, shapes});
+    view["map-content"].hidden = false;
+    view["map-status"].textContent = "";
+    if (view.display === "map") view.render();
+  }).catch(error => {
+    view["map-status"].textContent = t("地图加载失败，请刷新页面重试。", "Map failed to load. Reload the page to retry.");
+    throw error;
+  });
+}
+
 function setupViews(rows, view, params) {
   const switches = document.querySelectorAll("[data-view]");
   const panels = Object.fromEntries(["list", "map"].map(key => [key, document.getElementById(`${key}-view`)]));
   const render = () => {
     const minimum = Number(view.population.value);
-    const filtered = filterRows(rows, view.search.value, view.region.value, minimum);
+    const filtered = filterRows(rows, view.search.value, {region: view.region.value, minPopulation: minimum});
     const total = `${formatted(filtered.length)} / ${formatted(rows.length)}`;
     view.result.textContent = t(`符合条件 ${total} 个 suburb`, `${total} suburbs match`);
     if (view.display === "list") renderResults(filtered, view);
     else {
-      view.map ??= initCrimeMap(rows, mapSnapshot(params, rows), view);
-      renderCrimeMap(view.map, rows, filtered, view.metric.value, minimum);
+      if (!view.map) startMapLoading(rows, view, params);
+      else renderCrimeMap({map: view.map, rows, filtered, metric: view.metric.value, minPopulation: minimum});
     }
   };
   const setDisplay = display => {
@@ -209,7 +232,7 @@ function configureViewLanguage(view, rows, byCode) {
 function start(data) {
   pageLanguage = document.documentElement.lang === "en-AU" ? "en" : "zh";
   const ids = ["coverage", "search", "region", "metric", "population", "order", "results", "result",
-    "reset", "load-more", "suggestions", "lookup-detail"];
+    "reset", "load-more", "load-more-status", "suggestions", "lookup-detail", "map-status", "map-content"];
   const view = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
   const {rows, labels} = data;
   view.labels = labels;
@@ -223,8 +246,10 @@ function start(data) {
     view.lookup = row;
     renderLookup(view).focus();
   };
-  view.showArea = row => {
+  view.showArea = async row => {
     if (view.display === "map") {
+      if (!view.map) await view.mapPromise;
+      if (view.display !== "map") return view.showDetails(row);
       view.map.focusArea(row.code);
       return;
     }

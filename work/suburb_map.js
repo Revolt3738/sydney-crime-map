@@ -12,17 +12,20 @@ const zoomStep = 1.5;
 const wheelSensitivity = 120;
 const wheelLinePixels = 16;
 const mapMovePixels = 4;
+const panFraction = 0.25;
+const mapRateFormat = new Intl.NumberFormat("en-AU", {maximumFractionDigits: 1, useGrouping: false});
 
 function crimeBreaks(rows, key) {
   const rates = rows.map(row => row[key][1]).filter(rate => rate > 0).sort((a, b) => a - b);
-  return ratePercentiles.map(percentile => rates[Math.ceil(percentile * rates.length) - 1]);
+  return ratePercentiles.map(percentile => Number(mapRateFormat.format(rates[Math.ceil(percentile * rates.length) - 1])));
 }
 
 function crimeColour(rate, limits, excluded) {
   if (excluded) return mapColours.excluded;
   if (rate === null) return mapColours.missing;
   if (rate === 0) return mapColours.zero;
-  return colourSteps[limits.filter(limit => rate > limit).length];
+  const displayed = Number(mapRateFormat.format(rate));
+  return colourSteps[limits.filter(limit => displayed > limit).length];
 }
 
 function paddedExtent(boxes) {
@@ -55,7 +58,7 @@ function extentScale(box, width, height) {
 }
 
 function minimumMapZoom(box, full, width, height) {
-  return extentScale(box, width, height) <= extentScale(full, width, height) ? full : box;
+  return extentScale(box, width, height) < extentScale(full, width, height) ? full : box;
 }
 
 function overviewLabels(map) {
@@ -101,7 +104,8 @@ function configurePointerZoom(map, update) {
   };
   svg.addEventListener("wheel", event => {
     const mode = event.deltaMode;
-    if (event.deltaY === 0) return;
+    if (event.deltaY === 0 || event.ctrlKey || event.metaKey || !svg.contains(document.activeElement) ||
+        (event.deltaY > 0 && map.box === map.full)) return;
     event.preventDefault();
     const pixelsPerUnit = [1, wheelLinePixels, svg.clientHeight][mode];
     zoom(event, wheelZoomFactor(event.deltaY * pixelsPerUnit));
@@ -113,18 +117,18 @@ function configurePointerZoom(map, update) {
 }
 
 function addLegendItem(legend, label, fill) {
-  const item = add(legend, "span", undefined, "legend-item");
-  const swatch = add(item, "span", undefined, "legend-swatch");
+  const item = add(legend, "span", {className: "legend-item"});
+  const swatch = add(item, "span", {className: "legend-swatch"});
   swatch.setAttribute("aria-hidden", "true");
   if (fill === mapColours.excluded) swatch.classList.add("excluded");
   else swatch.style.backgroundColor = fill;
-  add(item, "span", label);
+  add(item, "span", {text: label});
 }
 
 function drawLegend(map) {
   const {legend, limits, minPopulation, metric} = map;
   const fragment = document.createDocumentFragment();
-  add(fragment, "strong", `${t(...metrics[metric])} · ${rateUnit()}`, "legend-heading");
+  add(fragment, "strong", {text: `${t(...metrics[metric])} · ${rateUnit()}`, className: "legend-heading"});
   const boundaryFormat = new Intl.NumberFormat("en-AU", {maximumFractionDigits: 1});
   const bounds = [0, ...limits[metric]].map(value => boundaryFormat.format(value));
   addLegendItem(fragment, "0", mapColours.zero);
@@ -143,6 +147,10 @@ function mapPath(row, geometry, group) {
   const path = document.createElementNS(svgNamespace, "path");
   path.dataset.code = row.code;
   path.setAttribute("d", geometry[0]);
+  path.setAttribute("role", "option");
+  path.setAttribute("aria-label", row.name);
+  path.setAttribute("aria-selected", "false");
+  path.setAttribute("tabindex", "-1");
   const title = document.createElementNS(svgNamespace, "title");
   title.textContent = row.name;
   path.append(title);
@@ -170,31 +178,73 @@ function configureMapActions(map, update) {
   document.getElementById("map-fit").onclick = () => {
     if (map.filtered.length) update(paddedExtent(map.filtered.map(row => shapes[row.code][1])));
   };
+  for (const [id, x, y] of [["up", 0, -1], ["down", 0, 1], ["left", -1, 0], ["right", 1, 0]]) {
+    document.getElementById(`map-${id}`).onclick = () => {
+      const [left, top, width, height] = map.box;
+      update([left + x * width * panFraction, top + y * height * panFraction, width, height]);
+    };
+  }
   map.focusArea = code => {
     selectMapArea(map, code);
     update(paddedExtent([shapes[code][1]]));
     map.summary.focus();
   };
-  configureMapGestures(map, update, code => selectMapArea(map, code));
+  configureMapGestures(map, update, code => {
+    selectMapArea(map, code);
+    map.paths.get(code).focus({preventScroll: true});
+  });
   configurePointerZoom(map, update);
+  configureMapKeyboard(map);
 }
 
 function selectMapArea(map, code) {
-  map.paths.get(map.selected)?.classList.remove("selected");
+  const oldPath = map.paths.get(map.keyboardCode);
+  if (oldPath) {
+    oldPath.classList.remove("selected");
+    oldPath.setAttribute("aria-selected", "false");
+    oldPath.setAttribute("tabindex", "-1");
+  }
   map.selected = code;
-  map.paths.get(code)?.classList.add("selected");
+  map.keyboardCode = code || map.filtered[0]?.code;
+  const activePath = map.paths.get(map.keyboardCode);
+  if (activePath) {
+    activePath.setAttribute("tabindex", "0");
+    if (code) {
+      activePath.classList.add("selected");
+      activePath.setAttribute("aria-selected", "true");
+    }
+  }
   const row = map.byCode.get(code);
   map.summary.textContent = describeArea(row, map.metric, map.minPopulation);
   map.actions.replaceChildren();
   if (!row) return;
-  const details = add(map.actions, "button", t("查看详情", "View details"), "link suburb");
+  const details = add(map.actions, "button", {text: t("查看详情", "View details"), className: "link suburb"});
   details.type = "button";
   details.onclick = () => map.showDetails(row);
   compareButton(map.actions, row, map.comparison);
 }
 
-function initCrimeMap(rows, snapshot, view) {
-  const shapes = JSON.parse(document.getElementById("map-shapes").textContent);
+async function loadMapShapes(rows) {
+  const source = document.getElementById("map-shapes");
+  let shapes;
+  if (source.dataset.src) {
+    const response = await fetch(source.dataset.src);
+    if (!response.ok) throw new Error(`Map data request failed: HTTP ${response.status}`);
+    shapes = await response.json();
+  } else {
+    shapes = JSON.parse(source.textContent);
+  }
+  for (const row of rows) {
+    const shape = shapes[row.code];
+    if (!Array.isArray(shape) || typeof shape[0] !== "string" || !Array.isArray(shape[1]) ||
+        shape[1].length !== 4 || !shape[1].every(Number.isFinite)) {
+      throw new Error(`Invalid map geometry for ${row.code}`);
+    }
+  }
+  return shapes;
+}
+
+function initCrimeMap({rows, snapshot, view, shapes}) {
   const svg = document.getElementById("map-svg");
   const group = document.getElementById("map-areas");
   const map = {
@@ -224,7 +274,7 @@ function initCrimeMap(rows, snapshot, view) {
   return map;
 }
 
-function renderCrimeMap(map, rows, filtered, metric, minPopulation) {
+function renderCrimeMap({map, rows, filtered, metric, minPopulation}) {
   const {limits, paths} = map;
   const current = limits[metric];
   map.metric = metric;

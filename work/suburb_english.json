@@ -70,7 +70,11 @@
   "地图选区": "Select a suburb",
   "选择筛选结果中的 suburb": "Choose a suburb from the results",
   "案件率图例": "Crime rate legend",
-  "电脑用滚轮缩放，拖动平移。手机用双指捏合缩放、单指拖动。在地图外滑动可滚动页面。": "On desktop, use the wheel to zoom and drag to pan. On mobile, pinch to zoom and drag with one finger. Swipe outside the map to scroll the page.",
+  "点击地图后可用滚轮缩放、拖动平移。键盘用户可用方向键选择地区，用平移按钮移动地图。手机用双指捏合缩放、单指拖动。": "Click the map to use the wheel to zoom or drag to pan. Use arrow keys to select a suburb and the pan buttons to move the map. On mobile, pinch to zoom and drag with one finger.",
+  "向上平移地图": "Pan map up",
+  "向下平移地图": "Pan map down",
+  "向左平移地图": "Pan map left",
+  "向右平移地图": "Pan map right",
   "点击任意 suburb 查看案件数、案件率和名次。": "Select a suburb to see its count, rate and rank.",
   "大悉尼及中央海岸的 Suburb 犯罪率分布图": "Suburb crime rates across Greater Sydney and the Central Coast",
   "ABS 2021 SAL 官方接口": "ABS 2021 Suburbs and Localities service",
@@ -84,5 +88,5 @@
   "犯罪统计定义": "Crime statistics definitions",
   "ABS 人口数据": "ABS Census population data",
   "ABS 2021 SAL 地图边界": "ABS 2021 suburb boundaries",
-  "正案件率按第 20、40、60、80、95 百分位分成六档，最深色标出最高约 5%。零案件、无案件率和低人口筛除各有单独标记。同一指标的分界不随筛选改变。边界来自": "Positive rates are grouped into six bands at the 20th, 40th, 60th, 80th and 95th percentiles. The darkest shade marks roughly the highest 5%. Zero, unavailable rates and areas excluded by population are shown separately. Filters keep the same cut-offs for each measure. Boundaries are from the "
+  "正案件率按第 20、40、60、80、95 百分位分成六档，色带按显示的一位小数划分，最深色标出最高约 5%。零案件、无案件率和低人口筛除各有单独标记。同一指标的分界不随筛选改变。边界来自": "Positive rates are grouped into six bands at the 20th, 40th, 60th, 80th and 95th percentiles, using the displayed one-decimal rates. The darkest shade marks roughly the highest 5%. Zero, unavailable rates and areas excluded by population are shown separately. Filters keep the same cut-offs for each measure. Boundaries are from the "
 }

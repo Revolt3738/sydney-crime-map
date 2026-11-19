@@ -31,6 +31,30 @@ def run_build(root):
 
 
 class DynamicBuildTests(unittest.TestCase):
+    def test_site_build_rejects_an_interrupted_update(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "work", root / "work")
+            (root / "outputs").mkdir()
+            (root / "work" / ".crime-update-pending.json").write_text("{}", encoding="utf-8")
+            result = subprocess.run(["node", "work/build_suburb_view.mjs"], cwd=root, text=True,
+                                    encoding="utf-8", capture_output=True, timeout=TEST_TIMEOUT_SECONDS)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Crime data update is incomplete", result.stderr)
+
+    def test_site_build_rejects_a_stale_home_page(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "work", root / "work")
+            (root / "outputs").mkdir()
+            subprocess.run(["node", "work/build_suburb_view.mjs"], cwd=root, check=True,
+                           timeout=TEST_TIMEOUT_SECONDS, capture_output=True)
+            (root / "work" / "crime_period.json").write_text(json.dumps(NEW_PERIOD), encoding="utf-8")
+            result = subprocess.run(["node", "work/build-seo.mjs"], cwd=root, text=True,
+                                    encoding="utf-8", capture_output=True, timeout=TEST_TIMEOUT_SECONDS)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("period changed since the home page was built", result.stderr)
+
     def test_new_period_and_changed_counts_flow_through_bilingual_site(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as directory:
             root = Path(directory)

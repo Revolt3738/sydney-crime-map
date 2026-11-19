@@ -3,15 +3,17 @@ import fs from "node:fs/promises";
 import vm from "node:vm";
 import {selectPlaces} from "./seo-places.mjs";
 import {applyPeriod, periodCopy, translatePeriod} from "./period-copy.mjs";
+import {readSnapshot} from "./snapshot.mjs";
 
 const directory = new URL("./", import.meta.url);
-const [templateCopy, script, raw, rawShapes, mapScript, mapCss, englishCopy, languageScript, gesturesScript, compareScript, detailsScript, chineseCopy, descriptionCopy, rawPeriod] = await Promise.all(
-  ["suburb_view.html", "suburb_view.js", "crime_data.json", "suburb_shapes.json",
+const [templateCopy, script, rawShapes, mapScript, mapCss, englishCopy, languageScript, gesturesScript, keyboardScript, compareScript, detailsScript, chineseCopy, descriptionCopy] = await Promise.all(
+  ["suburb_view.html", "suburb_view.js", "suburb_shapes.json",
     "suburb_map.js", "suburb_map.css", "suburb_english.json", "suburb_language.js",
-    "suburb_gestures.js", "suburb_compare.js", "suburb_details.js", "suburb_chinese_labels.json", "seo-descriptions.json", "crime_period.json"].map(
+    "suburb_gestures.js", "suburb_map_keyboard.js", "suburb_compare.js", "suburb_details.js", "suburb_chinese_labels.json", "seo-descriptions.json"].map(
     name => fs.readFile(new URL(name, directory), "utf8"),
   ),
 );
+const [raw, rawPeriod] = await readSnapshot(directory);
 const data = JSON.parse(raw);
 const period = periodCopy(JSON.parse(rawPeriod));
 const template = applyPeriod(templateCopy, period);
@@ -55,6 +57,7 @@ const html = template.replace("__SUBURB_DATA__", () => payload)
   .replace("__SUBURB_LANGUAGE_SCRIPT__", () => resolvedLanguageScript)
   .replace("__SUBURB_MAP_SCRIPT__", () => mapScript)
   .replace("__SUBURB_GESTURES_SCRIPT__", () => gesturesScript)
+  .replace("__SUBURB_KEYBOARD_SCRIPT__", () => keyboardScript)
   .replace("__SUBURB_COMPARE_SCRIPT__", () => compareScript)
   .replace("__SUBURB_DETAILS_SCRIPT__", () => detailsScript)
   .replace("__SUBURB_SCRIPT__", () => script);
@@ -75,19 +78,25 @@ assert.doesNotMatch(html, /__(?:SUBURB|CRIME)_[A-Z_]+__/);
 const start = 'start(JSON.parse(document.getElementById("dataset").textContent));';
 assert.ok(script.trimEnd().endsWith(start));
 const routines = script.trimEnd().slice(0, -start.length);
-vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + compareScript + detailsScript + routines + `
-  const compare = filterRows(data.rows, "Blacktown， Kingsford", "");
+vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + keyboardScript + compareScript + detailsScript + routines + `
+  const compare = filterRows(data.rows, "Blacktown， Kingsford");
   assert.equal(compare.length, 2);
-  assert.equal(filterRows(data.rows, "", "Central Coast").length, 152);
-  assert.equal(filterRows(data.rows, "", "", 2000).length, 602);
-  assert.equal(filterRows(data.rows, "Moore Park", "", 2000)[0].name, "Moore Park");
+  assert.equal(filterRows(data.rows, "", {region: "Central Coast"}).length, 152);
+  assert.equal(filterRows(data.rows, "", {minPopulation: 2000}).length, 602);
+  assert.equal(filterRows(data.rows, "Moore Park", {minPopulation: 2000})[0].name, "Moore Park");
   const gosford = matchingSuggestions(data.rows, "Gosford", []);
   assert.equal(gosford[0].name, "Gosford");
   assert.ok(gosford.some(row => row.name === "West Gosford"));
   const chatswood = matchingSuggestions(data.rows, "Chatswood");
   assert.deepEqual(Array.from(chatswood, row => row.name), ["Chatswood", "Chatswood West"]);
-  assert.equal(filterRows(data.rows, "Chatswood", "", 2000).length, 1);
-  assert.equal(filterRows(data.rows, "Chatswood West", "", 2000)[0].pop, 1521);
+  const par = matchingSuggestions(data.rows, "  pAr  ");
+  assert.deepEqual(Array.from(par.slice(0, 2), row => row.name), ["Parklea", "Parramatta"]);
+  const examples = [{name:"Spartan"}, {name:"West Park"}, {name:"Parramatta"}, {name:"Par"}];
+  assert.deepEqual(Array.from(matchingSuggestions(examples, "par"), row => row.name),
+    ["Par", "Parramatta", "West Park", "Spartan"]);
+  assert.equal(matchingSuggestions(data.rows, "par，gosford").length, 0);
+  assert.equal(filterRows(data.rows, "Chatswood", {minPopulation: 2000}).length, 1);
+  assert.equal(filterRows(data.rows, "Chatswood West", {minPopulation: 2000})[0].pop, 1521);
   const choices = new Map([...chatswood, ...gosford].map(row => [row.code, row]));
   const selection = comparisonSelection(new URL("https://example.com/").searchParams, choices);
   for (const code of choices.keys()) {
@@ -141,7 +150,7 @@ vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + compare
   const mapStub = {
     svg: makeElement(), summary: makeElement(), actions: makeElement(), shapes,
     byCode: new Map(chatswood.map(row => [row.code,row])),
-    paths: new Map(chatswood.map(row => [row.code,{classList:{add(name) {this.mark = name;}, remove() {this.mark = "";}}}])),
+    paths: new Map(chatswood.map(row => [row.code,{setAttribute() {}, classList:{add(name) {this.mark = name;}, remove() {this.mark = "";}}}])),
     comparison: lookup.comparison, metric:"non_dv", minPopulation:2000, selected:"",
   };
   configureMapActions(mapStub, box => { mapStub.box = box; });
@@ -161,7 +170,7 @@ vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + compare
   restoreQuery(restore, mapLink.searchParams);
   assert.equal(restore.search.value, "Gosford");
   assert.equal(restore.population.value, "500");
-  assert.equal(filterRows(data.rows, "Kingsford", "Central Coast").length, 0);
+  assert.equal(filterRows(data.rows, "Kingsford", {region: "Central Coast"}).length, 0);
   const sortingFixture = [
     {name: "Alpha", burglary: [30, 10, 2]},
     {name: "Beta", burglary: [10, 20, 1]},
@@ -171,10 +180,10 @@ vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + compare
   assert.equal(sortedRows(sortingFixture, "burglary", "countHigh").map(row => row.name).join(","), "Alpha,Beta,Missing");
   assert.equal(sortedRows(sortingFixture, "burglary", "rateLow").map(row => row.name).join(","), "Alpha,Beta,Missing");
   assert.equal(sortedRows(compare, "violent", "name")[0].name, "Blacktown");
-  const populationFiltered = filterRows(data.rows, "", "", 2000);
+  const populationFiltered = filterRows(data.rows, "", {minPopulation: 2000});
   assert.ok(populationFiltered.length < data.rows.length && populationFiltered.length > 500);
   assert.ok(populationFiltered.every(row => row.pop >= 2000));
-  assert.equal(filterRows([{pop: 1999}, {pop: 2000}], "", "", 2000).length, 1);
+  assert.equal(filterRows([{pop: 1999}, {pop: 2000}], "", {minPopulation: 2000}).length, 1);
   assert.ok(populationFiltered.find(row => row.name === "Blacktown").violent[2] > 0);
   for (const key of Object.keys(metrics)) {
     const limits = crimeBreaks(data.rows, key);
@@ -203,17 +212,18 @@ vm.runInNewContext(resolvedLanguageScript + mapScript + gesturesScript + compare
   assert.ok(wheelZoomFactor(-120) > 1 && wheelZoomFactor(120) < 1);
   assert.equal(wheelZoomFactor(0), 1);
   const single = gestureFrame(new Map([[1, {x: 40, y: 20}]]));
-  const dragged = gestureExtent([0, 0, 100, 80], single, {x: 50, y: 40, span: 0}, [20, 10], 2);
+  const dragged = gestureExtent({box: [0, 0, 100, 80], previous: single, current: {x: 50, y: 40, span: 0}, anchor: [20, 10], scale: 2});
   assert.equal(dragged.join(","), "-5,-10,100,80");
   const pair = gestureFrame(new Map([[1, {x: 30, y: 40}], [2, {x: 70, y: 40}]]));
   assert.equal(pair.span, 40);
-  const pinched = gestureExtent([0, 0, 100, 80], pair, {x: 60, y: 50, span: 80}, [25, 20], 2);
+  const pinched = gestureExtent({box: [0, 0, 100, 80], previous: pair, current: {x: 60, y: 50, span: 80}, anchor: [25, 20], scale: 2});
   assert.equal(pinched.join(","), "10,7.5,50,40");
   const events = new Map();
   const captures = [];
   const selected = [];
   const svg = {
     clientWidth: 100, clientHeight: 80,
+    focus() {},
     addEventListener: (name, fn) => events.set(name, fn),
     setPointerCapture: id => captures.push(id),
     getScreenCTM: () => ({inverse: () => ({})}),

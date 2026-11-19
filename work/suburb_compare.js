@@ -10,6 +10,16 @@ function exactSuburb(row, term) {
   return row.name.toLowerCase() === term || row.source?.toLowerCase() === term;
 }
 
+function suggestionRelevance(row, term) {
+  if (exactSuburb(row, term)) return 0;
+  const name = row.name.toLowerCase();
+  if (name.startsWith(term)) return 1;
+  for (let index = name.indexOf(term); index > 0; index = name.indexOf(term, index + 1)) {
+    if (/[^\p{L}\p{N}]/u.test(name[index - 1])) return 2;
+  }
+  return 3;
+}
+
 function rateBaseline(rows, key) {
   let cases = 0;
   let population = 0;
@@ -25,21 +35,21 @@ function matchingSuggestions(rows, query) {
   const term = query.trim().toLowerCase();
   if (!term || /[,，]/.test(term)) return [];
   return rows.filter(row => suburbMatches(row, term))
-    .sort((a, b) => Number(exactSuburb(b, term)) - Number(exactSuburb(a, term)) || names.compare(a.name, b.name))
+    .sort((a, b) => suggestionRelevance(a, term) - suggestionRelevance(b, term) || names.compare(a.name, b.name))
     .slice(0, suggestionLimit);
 }
 
-function renderCompareCard(container, row, key, baseline) {
+function renderCompareCard(container, row, {key, baseline}) {
   const [count, rate, rank] = row[key];
   const card = add(container, "article");
-  add(card, "h3", row.name);
-  add(card, "span", `${t("普查人口", "Census population")} ${formatted(row.pop)}`, "cell-note");
-  if (row.pop < smallPopulation) add(card, "span", t("小人口，记录率易波动", "Small population, rates can fluctuate"), "cell-note small-pop");
-  add(card, "p", `${t(...metrics[key])} · ${formatted(count)} ${t("件", count === 1 ? "incident" : "incidents")}`);
-  add(card, "strong", `${formatted(rate, decimals)} ${rateUnit()}`);
-  if (rate != null) add(card, "span", t(`基准的 ${formatted(rate / baseline, decimals)} 倍`,
-    `${formatted(rate / baseline, decimals)}× benchmark`), "cell-note");
-  if (rank != null) add(card, "span", rateRank(rank), "cell-note");
+  add(card, "h3", {text: row.name});
+  add(card, "span", {text: `${t("普查人口", "Census population")} ${formatted(row.pop)}`, className: "cell-note"});
+  if (row.pop < smallPopulation) add(card, "span", {text: t("小人口，记录率易波动", "Small population, rates can fluctuate"), className: "cell-note small-pop"});
+  add(card, "p", {text: `${t(...metrics[key])} · ${formatted(count)} ${t("件", count === 1 ? "incident" : "incidents")}`});
+  add(card, "strong", {text: `${formatted(rate, decimals)} ${rateUnit()}`});
+  if (rate != null) add(card, "span", {text: t(`基准的 ${formatted(rate / baseline, decimals)} 倍`,
+    `${formatted(rate / baseline, decimals)}× benchmark`), className: "cell-note"});
+  if (rank != null) add(card, "span", {text: rateRank(rank), className: "cell-note"});
 }
 
 function mapSnapshot(params, rows) {
@@ -75,7 +85,7 @@ function comparisonSelection(params, byCode) {
 }
 
 function compareButton(container, row, comparison) {
-  const button = add(container, "button", "", "compare-add");
+  const button = add(container, "button", {text: "", className: "compare-add"});
   button.type = "button";
   button.dataset.compare = row.code;
   comparison.updateButton(button);
@@ -84,19 +94,20 @@ function compareButton(container, row, comparison) {
 function showSuggestions(container, rows, view) {
   const fragment = document.createDocumentFragment();
   for (const row of matchingSuggestions(rows, view.search.value)) {
-    const item = add(fragment, "div", undefined, "suggestion-row");
-    const name = add(item, "div", undefined, "suggestion-name");
-    add(name, "strong", row.name);
+    const item = add(fragment, "div", {className: "suggestion-row"});
+    const name = add(item, "div", {className: "suggestion-name"});
+    add(name, "strong", {text: row.name});
     if ((row.pop ?? 0) < Number(view.population.value)) {
-      add(name, "small", t("低于人口门槛，仍可查看或对比", "Below population filter · available to view or compare"), "cell-note");
+      add(name, "small", {text: t("低于人口门槛，仍可查看或对比", "Below population filter · available to view or compare"), className: "cell-note"});
     }
     if (view.region.value && row.region !== view.region.value) {
-      add(name, "small", t("不在所选统计区内", "Outside the selected statistical area"), "cell-note");
+      add(name, "small", {text: t("不在所选统计区内", "Outside the selected statistical area"), className: "cell-note"});
     }
-    const actions = add(item, "div", undefined, "area-actions");
-    const inspect = add(actions, "button", view.display === "map" ? t("地图定位", "Locate on map") :
-      t("查看详情", "View details"), "link suburb");
+    const actions = add(item, "div", {className: "area-actions"});
+    const inspect = add(actions, "button", {text: view.display === "map" ? t("地图定位", "Locate on map") :
+      t("查看详情", "View details"), className: "link suburb"});
     inspect.type = "button";
+    inspect.setAttribute("aria-label", `${inspect.textContent} · ${row.name}`);
     inspect.onclick = () => view.showArea(row);
     compareButton(actions, row, view.comparison);
   }
@@ -135,14 +146,14 @@ function configureComparison(rows, view, params) {
       `Fixed benchmark: ${formatted(baseline, decimals)} ${rateUnit()}. Total incidents divided by total population for suburbs with available rates across Greater Sydney and the Central Coast. Filters and selections leave it unchanged.`);
     for (const code of selected) {
       const row = byCode.get(code);
-      const chip = add(chips, "button", `${row.name} ×`);
+      const chip = add(chips, "button", {text: `${row.name} ×`});
       chip.setAttribute("aria-label", `${t("移除", "Remove")} ${row.name}`);
       chip.onclick = () => {
         selection.remove(code);
         render();
         (chips.querySelector("button") ?? view.search).focus();
       };
-      renderCompareCard(cards, row, key, baseline);
+      renderCompareCard(cards, row, {key, baseline});
     }
     document.querySelectorAll("button[data-compare]").forEach(updateButton);
   };
